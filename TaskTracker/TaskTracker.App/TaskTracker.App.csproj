@@ -8,10 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="docs\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\TaskTracker.Core\TaskTracker.Core.csproj" />
   </ItemGroup>
 

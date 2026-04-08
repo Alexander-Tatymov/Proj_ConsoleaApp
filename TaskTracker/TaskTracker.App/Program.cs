@@ -1,15 +1,27 @@
-﻿
+﻿using TaskTracker.Core.Services;
 using TaskTracker.Core.Models;
 using TaskStatus = TaskTracker.Core.Models.TaskStatus;
-var tasks = new List<TaskItem>();
-var nextId = 1;
+var service = new TaskService();
 while (true)
 {
     Console.WriteLine();
     Console.WriteLine("TaskTracker v0.2");
     Console.WriteLine("----------------");
-    Console.WriteLine("1) Добавить задачу");
-    Console.WriteLine("2) Показать список задач");
+
+
+    try
+    {
+        string title = Console.ReadLine();
+        var task = service.Add(title);
+        Console.WriteLine($"Задача добавлена: #{task.Id} {task.Title} [{task.Status}]");
+    }
+    catch (ArgumentException ex)
+    {
+        Console.WriteLine("Ошибка: " + ex.Message);
+    }
+
+
+    var tasks = service.GetAll();
     Console.WriteLine("0) Выход");
     Console.WriteLine("----------------");
     Console.Write("Выберите пункт меню: ");
@@ -30,6 +42,7 @@ if (string.IsNullOrWhiteSpace(title))
             Console.WriteLine("Ошибка: название не может быть пустым.");
 continue;
         }
+        int nextId = 0;
         var task = new TaskItem
         {
             Id = nextId,
