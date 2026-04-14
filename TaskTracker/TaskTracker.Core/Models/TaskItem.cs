@@ -11,4 +11,9 @@ public class TaskItem
 
 public string Title { get; set; } = "";
     public TaskStatus Status { get; set; } = TaskStatus.New;
+
+    public void Add(TaskItem task)
+    {
+        throw new NotImplementedException();
+    }
 }
