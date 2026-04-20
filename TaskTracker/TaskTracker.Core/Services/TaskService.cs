@@ -100,4 +100,13 @@ public class TaskService
         _tasks.Remove(task);
     }
 
+    public void ReplaceAll(List<TaskItem> newTasks)
+    {
+        newTasks ??= new List<TaskItem>();
+        _tasks.Clear();
+        _tasks.AddRange(newTasks);
+        // Пересчитать следующий Id
+        _nextId = _tasks.Count == 0 ? 1 : _tasks.Max(t => t.Id) + 1;
+    }
+
 }
