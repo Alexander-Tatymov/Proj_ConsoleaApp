@@ -308,6 +308,75 @@ static void PrintTasks(List<TaskItem> tasks)
     }
 }
 
+    static void ExportTasks(TaskService service)
+    {
+        Console.Write("Введите путь для экспорта (например: export.json): ");
+        var exportPath = Console.ReadLine();
+
+        if (string.IsNullOrWhiteSpace(exportPath))
+        {
+            Console.WriteLine("Путь не может быть пустым!");
+            return;
+        }
+
+        try
+        {
+            // Создаём новый storage для экспорта
+            var exportStorage = new JsonTaskStorage(exportPath);
+
+            // Получаем все задачи и сохраняем
+            var tasks = service.GetAll();
+            exportStorage.Save(tasks);
+
+            Console.WriteLine($"✅ Экспорт выполнен! Задач сохранено: {tasks.Count}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Ошибка при экспорте: {ex.Message}");
+        }
+    }
+
+    static void ImportTasks(TaskService service)
+    {
+        Console.Write("Введите путь для импорта (например: import.json): ");
+        var importPath = Console.ReadLine();
+
+        if (string.IsNullOrWhiteSpace(importPath))
+        {
+            Console.WriteLine("Путь не может быть пустым!");
+            return;
+        }
+
+        try
+        {
+            // Создаём новый storage для импорта
+            var importStorage = new JsonTaskStorage(importPath);
+
+            // Загружаем задачи
+            var importedTasks = importStorage.Load();
+
+            if (importedTasks == null || importedTasks.Count == 0)
+            {
+                Console.WriteLine("Нет задач для импорта или файл пуст!");
+                return;
+            }
+
+            // Добавляем импортированные задачи в текущий сервис
+            foreach (var task in importedTasks)
+            {
+                // Генерируем новые ID, чтобы избежать конфликтов
+                service.Add(task.Title);
+                // Можно также добавить описание и статус, если нужно
+            }
+
+            Console.WriteLine($"✅ Импорт выполнен! Задач импортировано: {importedTasks.Count}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Ошибка при импорте: {ex.Message}");
+        }
+    }
+
 }
 
 
