@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TaskTracker.Core.Models;
-
 using static TaskTracker.Core.Services.TaskService;
+
+
 namespace TaskTracker.Core.Services;
 public class TaskService
 {
@@ -83,15 +84,14 @@ public class TaskService
     private TaskItem GetExisting(int id)
     {
         var task = _tasks.FirstOrDefault(t => t.Id == id);
-        if (task is null)
-            throw new ArgumentException($"Задача с Id={id} не найдена.");
-    return task;
+        if (task is null)  throw new ArgumentException($"Задача с Id={id} не найдена.");
+        return task;
     }
+
     public TaskItem ChangeStatus(int id, Models.TaskStatus newStatus)
     {
         var task = GetExisting(id);
         task.Status = newStatus;
-        var updated = ChangeStatus(id, newStatus);
         return task;
     }
     public void Delete(int id)
