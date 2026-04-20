@@ -54,6 +54,7 @@ while (true)
 
     if (input == "2") // Показать задачи
     {
+
         var tasks = service.GetAll();
         if (tasks.Count == 0)
         {
@@ -65,6 +66,8 @@ while (true)
         foreach (var t in tasks)
         {
             Console.WriteLine($"{t.Id}. {t.Title} [{t.Status}]");
+            if (!string.IsNullOrWhiteSpace(t.Description))
+                Console.WriteLine($" Описание: {t.Description}");
         }
         continue;
     }
