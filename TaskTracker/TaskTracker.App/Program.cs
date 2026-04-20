@@ -25,6 +25,7 @@ while (true)
     Console.WriteLine("2) Показать задачи");
     Console.WriteLine("3) Изменить статус задачи");
     Console.WriteLine("4) Удалить задачу");
+    Console.WriteLine("5) Редактировать задачу");
     Console.WriteLine("----------------");
     Console.Write("Выберите пункт меню: ");
 
@@ -158,6 +159,48 @@ while (true)
             service.Delete(id);
             storage.Save(service.GetAll());
             Console.WriteLine($"Задача с Id={id} удалена.");
+        }
+        catch (ArgumentException ex)
+        {
+            Console.WriteLine("Ошибка: " + ex.Message);
+        }
+        continue;
+    }
+
+    if (input == "5")
+    {
+        var tasks = service.GetAll();
+        if (tasks.Count == 0)
+        {
+            Console.WriteLine("Список задач пуст. Нечего редактировать.");
+        continue;
+        }
+        Console.WriteLine("Список задач:");
+        foreach (var t in tasks)
+        {
+            Console.WriteLine($"{t.Id}. {t.Title} [{t.Status}]");
+            if (!string.IsNullOrWhiteSpace(t.Description))
+                Console.WriteLine($" Описание: {t.Description}");
+        }
+        if (!TryReadInt("Введите Id задачи для редактирования: ",
+        out var id))
+        {
+            Console.WriteLine("Ошибка: Id должно быть числом.");
+            continue;
+        }
+        Console.Write("Введите новое название (Title): ");
+        var newTitle = Console.ReadLine() ?? "";
+        Console.Write("Введите новое описание (можно пусто): ");
+        var newDescription = Console.ReadLine() ?? "";
+        try
+        {
+            var updated = service.Update(id, newTitle, newDescription);
+            // Сохраняем в JSON после изменения
+            storage.Save(service.GetAll());
+            Console.WriteLine("Задача обновлена:");
+            Console.WriteLine($"{updated.Id}. {updated.Title} [{updated.Status}]");
+            if (!string.IsNullOrWhiteSpace(updated.Description))
+                Console.WriteLine($" Описание: {updated.Description}");
         }
         catch (ArgumentException ex)
         {
