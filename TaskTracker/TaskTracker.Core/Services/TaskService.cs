@@ -8,6 +8,41 @@ using static TaskTracker.Core.Services.TaskService;
 namespace TaskTracker.Core.Services;
 public class TaskService
 {
+
+    public List<TaskItem> SearchByTitle(string query)
+    {
+        query ??= "";
+        query = query.Trim();
+        if (query.Length == 0)
+            return GetAll();
+        return _tasks
+        .Where(t => (t.Title ?? "").Contains(query, StringComparison.OrdinalIgnoreCase))
+        .ToList();
+    }
+
+    public List<TaskItem> FilterByStatus(Models.TaskStatus? status)
+    {
+        if (status is null)
+            return GetAll(); // null = All
+        return _tasks.Where(t => t.Status == status).ToList();
+    }
+
+    public List<TaskItem> SortById(bool ascending = true)
+    {
+        return ascending
+        ? _tasks.OrderBy(t => t.Id).ToList()
+        : _tasks.OrderByDescending(t => t.Id).ToList();
+    }
+
+    public List<TaskItem> SortByStatusThenId()
+    {
+        return _tasks
+        .OrderBy(t => t.Status)
+        .ThenBy(t => t.Id)
+        .ToList();
+    }
+
+
     private readonly List<TaskItem> _tasks;
     private int _nextId;
     public TaskService(List<TaskItem>? initialTasks = null)
