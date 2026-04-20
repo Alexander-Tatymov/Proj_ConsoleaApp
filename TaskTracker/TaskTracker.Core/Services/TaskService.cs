@@ -1,61 +1,69 @@
-﻿using System.Threading.Tasks;
-using TaskTracker.Core.Models;
-namespace TaskTracker.Core.Services;
+﻿using TaskTracker.Core.Models;
+using System;
+using System.Collections.Generic;
 using System.Linq;
-public class TaskService
+using static TaskTracker.Core.Services.TaskService;
+
+namespace TaskTracker.Core.Services
 {
-    private readonly List<TaskItem> _tasks;
-    private int _nextId;
-    public TaskService(List<TaskItem>? initialTasks = null)
+    public interface ITaskStorage
     {
-        _tasks = initialTasks ?? new List<TaskItem>();
-        // следующий Id = максимальный Id + 1
-        _nextId = _tasks.Count == 0 ? 1 : _tasks.Max(t => t.Id) + 1;
+        void Save(List<TaskItem> tasks);
     }
-    public TaskItem Add(string title)
+
+    public class TaskService : ITaskService
     {
-        if (string.IsNullOrWhiteSpace(title))
-            throw new ArgumentException("Название не может быть пустым.");
+        private List<TaskItem> _tasks;
+
+        public TaskService()
+        {
+            _tasks = new List<TaskItem>(); // Ключевое исправление!
+        }
+
+        public TaskService(List<TaskItem> loadedTasks)
+        {
+        }
+
+        public List<TaskItem> GetAll()
+        {
+            return _tasks; // Теперь никогда не null
+        }
+
+        public TaskItem Add(string title)
+        {
             var task = new TaskItem
             {
-                Id = _nextId++,
-                Title = title.Trim(),
-                Status = Models.TaskStatus.New
+                Id = _tasks.Count + 1,
+                Title = title,
+                IsCompleted = false
             };
-        _tasks.Add(task);
-        return task;
-    }
+            _tasks.Add(task);
+            return task;
+        }
 
-public List<TaskItem> GetAll()
-    {
-        return _tasks.ToList();
-    }
-    private TaskItem GetExisting(int id)
-    {
-        var task = _tasks.FirstOrDefault(t => t.Id == id);
-        if (task is null)
-            throw new ArgumentException($"Задача с Id={id} не найдена.");
-    return task;
-    }
-    public TaskItem ChangeStatus(int id, Models.TaskStatus newStatus)
-    {
-        var task = GetExisting(id);
-        task.Status = newStatus;
-        return task;
-    }
-    public void Delete(int id)
-    {
-        var task = GetExisting(id);
-        _tasks.Remove(task);
-    }
+        public TaskItem ChangeStatus(int id, bool newStatus)
+        {
+            var task = _tasks.FirstOrDefault(t => t.Id == id);
+            if (task != null)
+            {
+                task.IsCompleted = newStatus;
+            }
+            return task;
+        }
 
-    public object Get_tasks()
-    {
-        throw new NotImplementedException();
-    }
+        public bool Delete(int id)
+        {
+            var task = _tasks.FirstOrDefault(t => t.Id == id);
+            if (task != null)  
+            {
+                return _tasks.Remove(task);
+            }
+            return false;
 
-    public object Add(string title, object v)
-    {
-        throw new NotImplementedException();
+        }
+
+        public interface ITaskService
+        {
+        }
     }
 }

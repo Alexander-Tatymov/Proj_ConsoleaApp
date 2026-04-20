@@ -46,7 +46,7 @@ while (true)
             continue;
         }
 
-        var task = service.Add(title, service.Get_tasks());
+        var task = service.Add(title);
         Console.WriteLine($"Задача добавлена: #{task.Id} {task.Title} [{task.Status}]");
         continue;
     }

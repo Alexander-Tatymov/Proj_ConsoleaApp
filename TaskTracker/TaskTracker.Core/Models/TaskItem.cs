@@ -11,6 +11,7 @@ public class TaskItem
 
 public string Title { get; set; } = "";
     public TaskStatus Status { get; set; } = TaskStatus.New;
+    public bool IsCompleted { get; internal set; }
 
     public void Add(TaskItem task)
     {
