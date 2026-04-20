@@ -28,13 +28,20 @@ public class TaskService
             };
         _tasks.Add(task);
 
-
-
+        return task;
+    }
+    public TaskItem Update(int id, string newTitle, string newDescription)
+    {
+        if (string.IsNullOrWhiteSpace(newTitle))
+            throw new ArgumentException("Название не может быть пустым.");
+        var task = GetExisting(id);
+        task.Title = newTitle.Trim();
+        task.Description = (newDescription ?? "").Trim();
         return task;
     }
 
 
-public List<TaskItem> GetAll()
+    public List<TaskItem> GetAll()
     {
         return _tasks.ToList();
     }
@@ -57,4 +64,5 @@ public List<TaskItem> GetAll()
         var task = GetExisting(id);
         _tasks.Remove(task);
     }
+
 }
