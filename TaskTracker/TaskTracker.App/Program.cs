@@ -1,15 +1,19 @@
 ﻿using Microsoft.VisualBasic.FileIO;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using TaskTracker.Core.Models;
 using TaskTracker.Core.Services;
+using TaskTracker.Core.Validation;
 using TaskTracker.Storage.Services;
 using static System.Runtime.InteropServices.JavaScript.JSType;
-using TaskTracker.Core.Validation;
 
 var dataFilePath = Path.Combine(AppContext.BaseDirectory, "data", "tasks.json");
 var backupsFolder = Path.Combine(AppContext.BaseDirectory, "backups");
 var exportsFolder = Path.Combine(AppContext.BaseDirectory, "exports");
+var logsFolder = Path.Combine(AppContext.BaseDirectory, "logs");
+var logger = new AppLogger(logsFolder);
+logger.Info("Application started");
 // Хранилище JSON
 var storage = new JsonTaskStorage(dataFilePath);
 
@@ -64,6 +68,13 @@ while (true)
         storage.Save(service.GetAll());
         Console.WriteLine($"Задача добавлена: #{task.Id} {task.Title} [{task.Status}]");
         continue;
+
+        try
+        {
+            logger.Info(message: $"ADD id={task.Id} title=\"{task.Title}\" ");
+        }
+
+        catch { }
     }
 
     if (input == "2") // Показать задачи
@@ -138,6 +149,7 @@ while (true)
             Console.WriteLine("Ошибка: " + ex.Message);
         }
         continue;
+        logger.Info($"STATUS id={updated.Id} newStatus={updated.Status}");
     }
 
     if (input == "4") // Удалить задачу
@@ -180,6 +192,7 @@ while (true)
             Console.WriteLine("Ошибка: " + ex.Message);
         }
         continue;
+        logger.Info($"DELETE id={id}");
     }
 
     if (input == "5")
@@ -210,6 +223,7 @@ while (true)
         try
         {
             var updated = service.Update(id, newTitle, newDescription);
+            logger.Info($"UPDATE id={updated.Id} title=\"{updated.Title}\"");
             // Сохраняем в JSON после изменения
             storage.Save(service.GetAll());
             Console.WriteLine("Задача обновлена:");
@@ -222,6 +236,9 @@ while (true)
             Console.WriteLine("Ошибка: " + ex.Message);
         }
         continue;
+
+        logger.Info($"UPDATE id={updated.Id} title=\"{updated.Title}\"");
+
     }
 
     if (input == "6")
@@ -393,6 +410,7 @@ static void PrintTasks(List<TaskItem> tasks)
             storage.Save(service.GetAll());
             var backupPath = BackupService.CreateBackup(dataFilePath, backupsFolder);
             Console.WriteLine("Бэкап создан: " + backupPath);
+            logger.Info($"BACKUP created file=\"{backupPath}\"");
         }
         catch (Exception ex)
         {
@@ -406,13 +424,11 @@ static void PrintTasks(List<TaskItem> tasks)
         try
         {
             Directory.CreateDirectory(exportsFolder);
-            var exportFile = Path.Combine(
-            exportsFolder,
-            $"tasks_export_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.json"
-            );
+            var exportFile = Path.Combine(exportsFolder, $"tasks_export_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.json");
             var exportStorage = new JsonTaskStorage(exportFile);
             exportStorage.Save(service.GetAll());
             Console.WriteLine("Экспорт выполнен: " + exportFile);
+            logger.Info($"EXPORT file=\"{exportFile}\"");
         }
         catch (Exception ex)
         {
@@ -423,6 +439,8 @@ static void PrintTasks(List<TaskItem> tasks)
 
     if (input == "11")
     {
+
+
         Console.WriteLine("Импорт заменит текущий список задач!");
         Console.Write("Введите путь к JSON-файлу для импорта: ");
         var importPath = (Console.ReadLine() ?? "").Trim();
@@ -463,6 +481,9 @@ static void PrintTasks(List<TaskItem> tasks)
             Console.WriteLine("Импорт отменён.");
             continue;
         }
+
+        logger.Info($"IMPORT start file=\"{importPath}\"");
+
         try
         {
             var importStorage = new JsonTaskStorage(importPath);
@@ -489,9 +510,11 @@ static void PrintTasks(List<TaskItem> tasks)
             // Сохраняем в основной файл data/tasks.json
             storage.Save(service.GetAll());
             Console.WriteLine("Импорт выполнен. Загружено задач:" + importedTasks.Count);
+            logger.Info($"IMPORT success count={importedTasks.Count}");
         }
         catch (Exception ex)
         {
+            logger.Error("IMPORT failed: " + ex.Message);
             Console.WriteLine("Ошибка import: " + ex.Message);
         }
         continue;
@@ -548,7 +571,6 @@ static void PrintTasks(List<TaskItem> tasks)
     }
 
 }
-
-
-
-
+internal class task
+{
+}
