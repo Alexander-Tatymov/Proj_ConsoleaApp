@@ -43,6 +43,7 @@ while (true)
     Console.WriteLine("11) Импорт из файла (import)");
     Console.WriteLine("12) Статистика (отчёт)");
     Console.WriteLine("13) Экспорт отчёта в файл");
+    Console.WriteLine("14) Показать последние строки лога");
     Console.WriteLine("----------------");
     Console.Write("Выберите пункт меню: ");
 
@@ -570,7 +571,35 @@ static void PrintTasks(List<TaskItem> tasks)
         continue;
     }
 
+    if (input == "14")
+    {
+        try
+        {
+            // Лог-файл за сегодня
+            var logFile = Path.Combine(logsFolder, $"app_{DateTime.Now:yyyy-MM-dd}.log");
+            if (!File.Exists(logFile))
+            {
+                Console.WriteLine("Лог за сегодня не найден.");
+                continue;
+            }
+            var lines = File.ReadAllLines(logFile);
+            Console.WriteLine("Последние 20 строк лога:");
+            Console.WriteLine("------------------------");
+            int start = Math.Max(0, lines.Length - 20);
+            for (int i = start; i < lines.Length; i++)
+                Console.WriteLine(lines[i]);
+        
+            Console.WriteLine("------------------------");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Ошибка чтения лога: " + ex.Message);
+        }
+        continue;
+    }
+
 }
+
 internal class task
 {
 }
