@@ -38,6 +38,7 @@ while (true)
     Console.WriteLine("10) Экспорт в файл (export)");
     Console.WriteLine("11) Импорт из файла (import)");
     Console.WriteLine("12) Статистика (отчёт)");
+    Console.WriteLine("13) Экспорт отчёта в файл");
     Console.WriteLine("----------------");
     Console.Write("Выберите пункт меню: ");
 
@@ -512,6 +513,37 @@ static void PrintTasks(List<TaskItem> tasks)
         DoneCount;
         if (sum != stats.Total)
         Console.WriteLine("ВНИМАНИЕ: сумма по статусам не равна общему количеству!");
+        continue;
+    }
+            
+    if (input == "13")
+        {
+            try
+        {
+            var reportsFolder = Path.Combine(AppContext.BaseDirectory, "reports");
+                Directory.CreateDirectory(reportsFolder);
+
+                    var stats = service.GetStats();
+                    var filePath = Path.Combine(reportsFolder, $"report_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.txt");
+                    
+            var lines = new List<string>
+            {
+                "TaskTracker Report",
+                "------------------",
+                $"Date: {DateTime.Now:yyyy-MM-dd HH:mm:ss}","",
+                $"Total: {stats.Total}",
+                $"New: {stats.NewCount}",
+                $"InProgress: {stats.InProgressCount}",
+                $"Done: {stats.DoneCount}",
+            };
+
+            File.WriteAllLines(filePath, lines);
+            Console.WriteLine("Отчёт сохранён: " + filePath);
+        }
+    catch (Exception ex)
+        {
+            Console.WriteLine("Ошибка экспорта отчёта: " + ex.Message);
+        }
         continue;
     }
 
