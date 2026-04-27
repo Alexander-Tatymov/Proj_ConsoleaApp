@@ -37,6 +37,7 @@ while (true)
     Console.WriteLine("9) Сделать резервную копию (backup)");
     Console.WriteLine("10) Экспорт в файл (export)");
     Console.WriteLine("11) Импорт из файла (import)");
+    Console.WriteLine("12) Статистика (отчёт)");
     Console.WriteLine("----------------");
     Console.Write("Выберите пункт меню: ");
 
@@ -492,6 +493,25 @@ static void PrintTasks(List<TaskItem> tasks)
         {
             Console.WriteLine("Ошибка import: " + ex.Message);
         }
+        continue;
+    }
+
+    if (input == "12")
+    {
+        var stats = service.GetStats();
+        Console.WriteLine();
+        Console.WriteLine("Статистика задач");
+        Console.WriteLine("----------------");
+        Console.WriteLine($"Всего задач: {stats.Total}");
+        Console.WriteLine($"New: {stats.NewCount}");
+        Console.WriteLine($"InProgress: {stats.InProgressCount}");
+        Console.WriteLine($"Done: {stats.DoneCount}");
+        Console.WriteLine("----------------");
+        // простая проверка: сумма должна равняться total
+        var sum = stats.NewCount + stats.InProgressCount + stats.
+        DoneCount;
+        if (sum != stats.Total)
+        Console.WriteLine("ВНИМАНИЕ: сумма по статусам не равна общему количеству!");
         continue;
     }
 
