@@ -5,6 +5,7 @@ using TaskTracker.Core.Models;
 using TaskTracker.Core.Services;
 using TaskTracker.Storage.Services;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using TaskTracker.Core.Validation;
 
 var dataFilePath = Path.Combine(AppContext.BaseDirectory, "data", "tasks.json");
 var backupsFolder = Path.Combine(AppContext.BaseDirectory, "backups");
@@ -464,6 +465,23 @@ static void PrintTasks(List<TaskItem> tasks)
         {
             var importStorage = new JsonTaskStorage(importPath);
             var importedTasks = importStorage.Load();
+            bool ok = true;
+            for (int i = 0; i < importedTasks.Count; i++)
+            {
+                var t = importedTasks[i];
+                var error = TaskValidator.Validate(t);
+                if (error != null)
+                {
+                    Console.WriteLine($"Ошибка импорта: задача #{i + 1} не прошла проверку: { error}");
+                ok = false;
+                    break;
+                }
+            }
+            if (!ok)
+            {
+                Console.WriteLine("Импорт отменён.");
+                continue;
+            }
             // Заменяем задачи в сервисе
             service.ReplaceAll(importedTasks);
             // Сохраняем в основной файл data/tasks.json
