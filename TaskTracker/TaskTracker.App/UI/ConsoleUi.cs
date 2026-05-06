@@ -8,11 +8,13 @@ using TaskTracker.Core.Models;
 namespace TaskTracker.App.UI;
 public static class ConsoleUi
 {
+    private static object get;
+
     public static void PrintHeader()
     {
         Console.WriteLine();
-    
-Console.WriteLine("TaskTracker");
+
+        Console.WriteLine("TaskTracker");
         Console.WriteLine("----------------");
     }
     public static void PrintMenu()
@@ -26,7 +28,7 @@ Console.WriteLine("TaskTracker");
         Console.WriteLine("7) Фильтр по статусу");
         Console.WriteLine("8) Сортировка списка");
         Console.WriteLine("9) Сделать резервную копию (backup)");
-    Console.WriteLine("10) Экспорт в файл (export)");
+        Console.WriteLine("10) Экспорт в файл (export)");
         Console.WriteLine("11) Импорт из файла (import)");
         Console.WriteLine("12) Статистика (отчёт)");
         Console.WriteLine("13) Экспорт отчёта в файл");
@@ -43,9 +45,9 @@ Console.WriteLine("TaskTracker");
     {
         Console.Write(prompt);
 
-        
-    
-var text = Console.ReadLine();
+
+
+        var text = Console.ReadLine();
         return int.TryParse(text, out value);
     }
     public static void PrintTasks(List<TaskItem> tasks)
@@ -62,5 +64,10 @@ var text = Console.ReadLine();
             if (!string.IsNullOrWhiteSpace(t.Description))
                 Console.WriteLine($" Описание: {t.Description}");
         }
+    }
+
+    internal static string? ReadString()
+    {
+        return Console.ReadLine();
     }
 }

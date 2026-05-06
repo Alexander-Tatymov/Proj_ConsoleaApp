@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using TaskTracker.App.UI;
 using TaskTracker.Core.Models;
 using TaskTracker.Core.Services;
 using TaskTracker.Core.Validation;
@@ -28,26 +29,11 @@ while (true)
 {
     Console.WriteLine();
     Console.WriteLine("TaskTracker v0.2");
-    Console.WriteLine("----------------");
-    Console.WriteLine("0) Выход");
-    Console.WriteLine("1) Добавить задачу");
-    Console.WriteLine("2) Показать задачи");
-    Console.WriteLine("3) Изменить статус задачи");
-    Console.WriteLine("4) Удалить задачу");
-    Console.WriteLine("5) Редактировать задачу");
-    Console.WriteLine("6) Поиск по названию");
-    Console.WriteLine("7) Фильтр по статусу");
-    Console.WriteLine("8) Сортировка списка");
-    Console.WriteLine("9) Сделать резервную копию (backup)");
-    Console.WriteLine("10) Экспорт в файл (export)");
-    Console.WriteLine("11) Импорт из файла (import)");
-    Console.WriteLine("12) Статистика (отчёт)");
-    Console.WriteLine("13) Экспорт отчёта в файл");
-    Console.WriteLine("14) Показать последние строки лога");
-    Console.WriteLine("----------------");
-    Console.Write("Выберите пункт меню: ");
+    ConsoleUi.PrintHeader();
+    ConsoleUi.PrintMenu();
+    var input = ConsoleUi.ReadString("Выберите пункт меню: ").Trim();
 
-    var input = Console.ReadLine();
+    //var input = Console.ReadLine();
     if (input == "0")
     {
         Console.WriteLine("Выход...");
@@ -57,7 +43,7 @@ while (true)
     if (input == "1") // Добавить задачу
     {
         Console.Write("Введите название задачи: ");
-        string title = Console.ReadLine();
+        string title = ConsoleUi.ReadString();
 
         if (string.IsNullOrWhiteSpace(title))
         {
@@ -175,7 +161,7 @@ while (true)
         }
 
         Console.Write("Точно удалить? (y/n): ");
-        var answer = (Console.ReadLine() ?? "").Trim().ToLower();
+        var answer = (ConsoleUi.ReadString() ?? "").Trim().ToLower();
         if (answer != "y")
         {
             Console.WriteLine("Удаление отменено.");
@@ -218,9 +204,9 @@ while (true)
             continue;
         }
         Console.Write("Введите новое название (Title): ");
-        var newTitle = Console.ReadLine() ?? "";
+        var newTitle = ConsoleUi.ReadString() ?? "";
         Console.Write("Введите новое описание (можно пусто): ");
-        var newDescription = Console.ReadLine() ?? "";
+        var newDescription = ConsoleUi.ReadString() ?? "";
         try
         {
             var updated = service.Update(id, newTitle, newDescription);
@@ -246,7 +232,7 @@ while (true)
     {
 
             Console.Write("Введите текст для поиска: ");
-            var query = Console.ReadLine() ?? "";
+            var query = ConsoleUi.ReadString() ?? "";
             var found = service.SearchByTitle(query);
             PrintTasks(found);
             continue;
@@ -314,7 +300,7 @@ while (true)
 static bool TryReadInt(string prompt, out int value)
 {
     Console.Write(prompt);
-    var text = Console.ReadLine();
+    var text = ConsoleUi.ReadString();
     return int.TryParse(text, out value);
 }
 
@@ -337,7 +323,7 @@ static void PrintTasks(List<TaskItem> tasks)
     static void ExportTasks(TaskService service)
     {
         Console.Write("Введите путь для экспорта (например: export.json): ");
-        var exportPath = Console.ReadLine();
+        var exportPath = ConsoleUi.ReadString();
 
         if (string.IsNullOrWhiteSpace(exportPath))
         {
@@ -365,7 +351,7 @@ static void PrintTasks(List<TaskItem> tasks)
     static void ImportTasks(TaskService service)
     {
         Console.Write("Введите путь для импорта (например: import.json): ");
-        var importPath = Console.ReadLine();
+        var importPath = ConsoleUi.ReadString();
 
         if (string.IsNullOrWhiteSpace(importPath))
         {
@@ -444,7 +430,7 @@ static void PrintTasks(List<TaskItem> tasks)
 
         Console.WriteLine("Импорт заменит текущий список задач!");
         Console.Write("Введите путь к JSON-файлу для импорта: ");
-        var importPath = (Console.ReadLine() ?? "").Trim();
+        var importPath = (ConsoleUi.ReadString() ?? "").Trim();
         if (string.IsNullOrWhiteSpace(importPath))
         {
 
@@ -458,7 +444,7 @@ static void PrintTasks(List<TaskItem> tasks)
             continue;
         }
         Console.Write("Сделать backup перед импортом? (y/n): ");
-        var backupAnswer = (Console.ReadLine() ?? "").Trim().ToLower();
+        var backupAnswer = (ConsoleUi.ReadString() ?? "").Trim().ToLower();
         if (backupAnswer == "y")
         {
             try
@@ -476,7 +462,7 @@ static void PrintTasks(List<TaskItem> tasks)
             }
         }
         Console.Write("Точно импортировать и заменить задачи? (y/n): ");
-    var sure = (Console.ReadLine() ?? "").Trim().ToLower();
+    var sure = (ConsoleUi.ReadString() ?? "").Trim().ToLower();
         if (sure != "y")
         {
             Console.WriteLine("Импорт отменён.");
