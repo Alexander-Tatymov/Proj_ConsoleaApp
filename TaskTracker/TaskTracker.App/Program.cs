@@ -40,49 +40,15 @@ while (true)
         break;
     }
 
-    if (input == "1") // Добавить задачу
+    if (input == "1")
     {
-        Console.Write("Введите название задачи: ");
-        string title = ConsoleUi.ReadString();
-
-        if (string.IsNullOrWhiteSpace(title))
-        {
-            Console.WriteLine("Ошибка: название не может быть пустым.");
-            continue;
-        }
-
-        var task = service.Add(title);
-        storage.Save(service.GetAll());
-        Console.WriteLine($"Задача добавлена: #{task.Id} {task.Title} [{task.Status}]");
+        MenuHandlers.AddTask(service, storage, logger);
         continue;
-
-        try
-        {
-            logger.Info(message: $"ADD id={task.Id} title=\"{task.Title}\" ");
-        }
-
-        catch { }
     }
 
-    if (input == "2") // Показать задачи
+    if (input == "2")
     {
-
-        var tasks = service.GetAll();
-        if (tasks.Count == 0)
-        {
-            Console.WriteLine("Список задач пуст.");
-            continue;
-        }
-        PrintTasks(tasks);
-        continue;
-
-        Console.WriteLine("Список задач:");
-        foreach (var t in tasks)
-        {
-            Console.WriteLine($"{t.Id}. {t.Title} [{t.Status}]");
-            if (!string.IsNullOrWhiteSpace(t.Description))
-                Console.WriteLine($" Описание: {t.Description}");
-        }
+        MenuHandlers.ListTasks(service);
         continue;
     }
 
@@ -139,47 +105,10 @@ while (true)
         logger.Info($"STATUS id={updated.Id} newStatus={updated.Status}");
     }
 
-    if (input == "4") // Удалить задачу
+    if (input == "4")
     {
-        var tasks = service.GetAll();
-        if (tasks.Count == 0)
-        {
-            Console.WriteLine("Список задач пуст. Нечего удалять.");
-            continue;
-        }
-
-        Console.WriteLine("Список задач:");
-        foreach (var t in tasks)
-        {
-            Console.WriteLine($"{t.Id}. {t.Title} [{t.Status}]");
-        }
-
-        if (!TryReadInt("Введите Id задачи для удаления: ", out var id))
-        {
-            Console.WriteLine("Ошибка: Id должно быть числом.");
-            continue;
-        }
-
-        Console.Write("Точно удалить? (y/n): ");
-        var answer = (ConsoleUi.ReadString() ?? "").Trim().ToLower();
-        if (answer != "y")
-        {
-            Console.WriteLine("Удаление отменено.");
-            continue;
-        }
-
-        try
-        {
-            service.Delete(id);
-            storage.Save(service.GetAll());
-            Console.WriteLine($"Задача с Id={id} удалена.");
-        }
-        catch (ArgumentException ex)
-        {
-            Console.WriteLine("Ошибка: " + ex.Message);
-        }
+        MenuHandlers.DeleteTask(service, storage, logger);
         continue;
-        logger.Info($"DELETE id={id}");
     }
 
     if (input == "5")
