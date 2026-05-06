@@ -8,6 +8,7 @@ using TaskTracker.Core.Services;
 using TaskTracker.Core.Validation;
 using TaskTracker.Storage.Services;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using TaskTracker.Core.Storage;
 
 var dataFilePath = Path.Combine(AppContext.BaseDirectory, "data", "tasks.json");
 var backupsFolder = Path.Combine(AppContext.BaseDirectory, "backups");
@@ -16,7 +17,23 @@ var logsFolder = Path.Combine(AppContext.BaseDirectory, "logs");
 var logger = new AppLogger(logsFolder);
 logger.Info("Application started");
 // Хранилище JSON
-var storage = new JsonTaskStorage(dataFilePath);
+ITaskStorage storage;
+Console.WriteLine("Выберите хранилище:");
+Console.WriteLine("1 - JSON файл (обычный режим)");
+Console.WriteLine("2 - Memory (тестовый режим, данные пропадут после выхода)");
+Console.Write("Ваш выбор: ");
+var mode = (Console.ReadLine() ?? "").Trim();
+if (mode == "2")
+{
+    storage = new MemoryTaskStorage();
+    Console.WriteLine("Режим: MemoryStorage");
+}
+else
+{
+    storage = new JsonTaskStorageAdapter(dataFilePath);
+
+Console.WriteLine("Режим: JsonStorage");
+}
 
 // Загружаем задачи из файла
 var loadedTasks = storage.Load();

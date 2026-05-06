@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using TaskTracker.App.UI;
 using TaskTracker.Core.Models;
 using TaskTracker.Core.Services;
+using TaskTracker.Core.Storage;
 using TaskTracker.Storage.Services;
 namespace TaskTracker.App.UI;
 public static class MenuHandlers
@@ -64,5 +65,15 @@ logger.Info($"ADD id={task.Id} title=\"{task.Title}\"");
             Console.WriteLine("Ошибка: " + ex.Message);
             logger.Error("DELETE failed: " + ex.Message);
         }
+    }
+
+    internal static void DeleteTask(TaskService service, ITaskStorage storage, AppLogger logger)
+    {
+        throw new NotImplementedException();
+    }
+
+    internal static void AddTask(TaskService service, ITaskStorage storage, AppLogger logger)
+    {
+        
     }
 }
