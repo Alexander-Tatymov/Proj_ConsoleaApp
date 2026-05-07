@@ -37,5 +37,6 @@ var service = new TaskService();
         Assert.AreEqual("New", updated.Title);
     
 Assert.AreEqual("Desc", updated.Description);
+        Assert.AreEqual(999, task.Id);
     }
 }
