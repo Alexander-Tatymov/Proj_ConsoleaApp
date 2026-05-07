@@ -44,9 +44,6 @@ public static class ConsoleUi
     public static bool TryReadInt(string prompt, out int value)
     {
         Console.Write(prompt);
-
-
-
         var text = Console.ReadLine();
         return int.TryParse(text, out value);
     }

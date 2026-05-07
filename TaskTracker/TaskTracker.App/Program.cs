@@ -59,7 +59,7 @@ while (true)
 
     if (input == "1")
     {
-        MenuHandlers.AddTask(service, storage, logger);
+        MenuHandlers.AddTask(service, (JsonTaskStorageAdapter)storage, logger);
         continue;
     }
 
@@ -84,7 +84,7 @@ while (true)
             Console.WriteLine($"{t.Id}. {t.Title} [{t.Status}]");
         }
 
-        if (!TryReadInt("Введите Id задачи: ", out var id))
+        if (!ConsoleUi.TryReadInt("Введите Id задачи: ", out var id))
         {
             Console.WriteLine("Ошибка: Id должно быть числом.");
             continue;
@@ -95,7 +95,7 @@ while (true)
         Console.WriteLine("1 - InProgress (В работе)");
         Console.WriteLine("2 - Done (Готово)");
 
-        if (!TryReadInt("Введите статус (0/1/2): ", out var statusNumber))
+        if (!ConsoleUi.TryReadInt("Введите статус (0/1/2): ", out var statusNumber))
         {
             Console.WriteLine("Ошибка: статус должен быть числом 0 / 1 / 2.");
             continue;
@@ -124,7 +124,7 @@ while (true)
 
     if (input == "4")
     {
-        MenuHandlers.DeleteTask(service, storage, logger);
+        MenuHandlers.DeleteTask(service, (JsonTaskStorageAdapter)storage, logger);
         continue;
     }
 
@@ -143,7 +143,7 @@ while (true)
             if (!string.IsNullOrWhiteSpace(t.Description))
                 Console.WriteLine($" Описание: {t.Description}");
         }
-        if (!TryReadInt("Введите Id задачи для редактирования: ",
+        if (!ConsoleUi.TryReadInt("Введите Id задачи для редактирования: ",
         out var id))
         {
             Console.WriteLine("Ошибка: Id должно быть числом.");
@@ -177,10 +177,9 @@ while (true)
     if (input == "6")
     {
 
-            Console.Write("Введите текст для поиска: ");
-            var query = ConsoleUi.ReadString() ?? "";
+        var query = ConsoleUi.ReadString("Введите текст для поиска:");
             var found = service.SearchByTitle(query);
-            PrintTasks(found);
+        ConsoleUi.PrintTasks(found);
             continue;
     }
 
@@ -191,7 +190,7 @@ while (true)
         Console.WriteLine("1 - New");
         Console.WriteLine("2 - InProgress");
         Console.WriteLine("3 - Done");
-        if (!TryReadInt("Введите вариант (0/1/2/3): ", out var option))
+        if (!ConsoleUi.TryReadInt("Введите вариант (0/1/2/3): ", out var option))
         {
             Console.WriteLine("Ошибка: нужно число 0/1/2/3.");
             continue;
@@ -212,7 +211,7 @@ while (true)
             continue;
         }
         var filtered = service.FilterByStatus(status);
-        PrintTasks(filtered);
+        ConsoleUi.PrintTasks(filtered);
         continue;
     }
 
@@ -222,7 +221,7 @@ while (true)
         Console.WriteLine("1 - по Id (по возрастанию)");
         Console.WriteLine("2 - по Id (по убыванию)");
         Console.WriteLine("3 - по статусу, затем по Id");
-        if (!TryReadInt("Введите вариант (1/2/3): ", out var option))
+        if (!ConsoleUi.TryReadInt("Введите вариант (1/2/3): ", out var option))
         {
             Console.WriteLine("Ошибка: нужно число 1/2/3.");
             continue;
@@ -236,7 +235,7 @@ while (true)
             Console.WriteLine("Ошибка: выберите 1, 2 или 3.");
             continue;
         }
-        PrintTasks(sorted);
+        ConsoleUi.PrintTasks(sorted);
         continue;
     }
 

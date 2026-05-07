@@ -1,27 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using TaskTracker.App.UI;
+﻿using TaskTracker.App.UI;
 using TaskTracker.Core.Models;
 using TaskTracker.Core.Services;
 using TaskTracker.Core.Storage;
 using TaskTracker.Storage.Services;
+
 namespace TaskTracker.App.UI;
+
 public static class MenuHandlers
 {
-    public static void AddTask(TaskService service, JsonTaskStorage storage, AppLogger logger)
+    // Измените JsonTaskStorage на ITaskStorage или JsonTaskStorageAdapter
+    public static void AddTask(TaskService service, ITaskStorage storage, AppLogger logger)
     {
         var title = ConsoleUi.ReadString("Введите название задачи: ");
-    try
+        try
         {
             var task = service.Add(title);
             storage.Save(service.GetAll());
-            Console.WriteLine($"Задача добавлена: #{task.Id}{ task.Title}[{ task.Status}]");
-    
-logger.Info($"ADD id={task.Id} title=\"{task.Title}\"");
+            Console.WriteLine($"Задача добавлена: #{task.Id}{task.Title}[{task.Status}]");
+            logger.Info($"ADD id={task.Id} title=\"{task.Title}\"");
         }
         catch (ArgumentException ex)
         {
@@ -29,6 +25,7 @@ logger.Info($"ADD id={task.Id} title=\"{task.Title}\"");
             logger.Error("ADD failed: " + ex.Message);
         }
     }
+
     public static void ListTasks(TaskService service)
     {
         var tasks = service.GetAll();
@@ -39,20 +36,23 @@ logger.Info($"ADD id={task.Id} title=\"{task.Title}\"");
         }
         ConsoleUi.PrintTasks(tasks);
     }
-    public static void DeleteTask(TaskService service, JsonTaskStorage storage, AppLogger logger)
+
+    public static void DeleteTask(TaskService service, ITaskStorage storage, AppLogger logger)
     {
         ListTasks(service);
         if (!ConsoleUi.TryReadInt("Введите Id задачи для удаления: ", out var id))
         {
             Console.WriteLine("Ошибка: Id должно быть числом.");
-        return;
+            return;
         }
+
         var answer = ConsoleUi.ReadString("Точно удалить? (y/n): ").Trim().ToLower();
-    if (answer != "y")
+        if (answer != "y")
         {
             Console.WriteLine("Удаление отменено.");
             return;
         }
+
         try
         {
             service.Delete(id);
@@ -65,15 +65,5 @@ logger.Info($"ADD id={task.Id} title=\"{task.Title}\"");
             Console.WriteLine("Ошибка: " + ex.Message);
             logger.Error("DELETE failed: " + ex.Message);
         }
-    }
-
-    internal static void DeleteTask(TaskService service, ITaskStorage storage, AppLogger logger)
-    {
-        throw new NotImplementedException();
-    }
-
-    internal static void AddTask(TaskService service, ITaskStorage storage, AppLogger logger)
-    {
-        
     }
 }
