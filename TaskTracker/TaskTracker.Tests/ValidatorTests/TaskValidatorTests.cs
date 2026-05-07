@@ -43,4 +43,18 @@ public class TaskValidatorTests
         Assert.IsNull(error);
     
 }
+
+    [TestMethod]
+    public void Validate_DescriptionTooLong_ReturnsError()
+    {
+        var longDesc = new string('b', TaskValidator.DescriptionMaxLength + 1);
+        var task = new TaskItem
+        {
+            Title = "Ok",
+            Description = longDesc
+        };
+        var error = TaskValidator.Validate(task);
+        Assert.IsNotNull(error);
+    }
+
 }
