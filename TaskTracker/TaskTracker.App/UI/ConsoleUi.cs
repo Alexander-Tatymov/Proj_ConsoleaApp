@@ -34,6 +34,10 @@ public static class ConsoleUi
         Console.WriteLine("13) Экспорт отчёта в файл");
         Console.WriteLine("14) Показать последние строки лога");
         Console.WriteLine("0) Выход");
+
+        var version = typeof(Program).Assembly.GetName().Version?.ToString() ?? "unknown";
+        Console.WriteLine($"TaskTracker v{version}");
+
         Console.WriteLine("----------------");
     }
     public static string ReadString(string prompt)
