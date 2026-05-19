@@ -16,6 +16,7 @@ var baseDir = AppContext.BaseDirectory;
 var configPath = Path.Combine(baseDir, "config.json");
 var configService = new ConfigService(configPath);
 var cfg = configService.LoadOrCreateDefault();
+configService.Save(cfg);
 Console.WriteLine("Config: " + configPath);
 Console.WriteLine($"StorageMode: {cfg.StorageMode}, AskOnStart: { cfg.AskOnStart}");
 
@@ -569,7 +570,7 @@ static void PrintTasks(List<TaskItem> tasks)
     }
 
 }
-
+Console.WriteLine($"Role: {cfg.Role}");
 internal class task
 {
 }

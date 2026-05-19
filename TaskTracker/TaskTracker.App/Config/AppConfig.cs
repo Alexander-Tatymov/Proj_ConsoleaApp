@@ -14,4 +14,5 @@ public bool AskOnStart { get; set; } = false;
     public string BackupsFolder { get; set; } = "backups";
     public string ExportsFolder { get; set; } = "exports";
     public string ReportsFolder { get; set; } = "reports";
+    public string Role { get; set; } = "User";
 }
