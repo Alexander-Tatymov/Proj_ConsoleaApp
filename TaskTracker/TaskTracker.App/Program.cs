@@ -9,6 +9,7 @@ using TaskTracker.Core.Validation;
 using TaskTracker.Storage.Services;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using TaskTracker.Core.Storage;
+using TaskTracker.App.UI;
 
 var dataFilePath = Path.Combine(AppContext.BaseDirectory, "data", "tasks.json");
 var backupsFolder = Path.Combine(AppContext.BaseDirectory, "backups");
@@ -336,42 +337,35 @@ static void PrintTasks(List<TaskItem> tasks)
 
     if (input == "9")
     {
-        try
-        {
             // Сохраним текущие данные на всякий случай
+            SafeRunner.Run("BACKUP", logger, () =>
+            { 
             storage.Save(service.GetAll());
             var backupPath = BackupService.CreateBackup(dataFilePath, backupsFolder);
             Console.WriteLine("Бэкап создан: " + backupPath);
             logger.Info($"BACKUP created file=\"{backupPath}\"");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Ошибка backup: " + ex.Message);
-        }
+            
+            });
+        
         continue;
     }
 
     if (input == "10")
     {
-        try
-        {
+        SafeRunner.Run("EXPORT", logger, () =>
+            { 
             Directory.CreateDirectory(exportsFolder);
-            var exportFile = Path.Combine(exportsFolder, $"tasks_export_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.json");
-            var exportStorage = new JsonTaskStorage(exportFile);
-            exportStorage.Save(service.GetAll());
-            Console.WriteLine("Экспорт выполнен: " + exportFile);
-            logger.Info($"EXPORT file=\"{exportFile}\"");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Ошибка export: " + ex.Message);
-        }
+        var exportFile = Path.Combine(exportsFolder, $"tasks_export_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.json");
+        var exportStorage = new JsonTaskStorage(exportFile);
+        exportStorage.Save(service.GetAll());
+        Console.WriteLine("Экспорт выполнен: " + exportFile);
+        logger.Info($"EXPORT file=\"{exportFile}\"");
+    });
         continue;
     }
 
     if (input == "11")
     {
-
 
         Console.WriteLine("Импорт заменит текущий список задач!");
         Console.Write("Введите путь к JSON-файлу для импорта: ");
@@ -379,8 +373,8 @@ static void PrintTasks(List<TaskItem> tasks)
         if (string.IsNullOrWhiteSpace(importPath))
         {
 
-        
-        Console.WriteLine("Ошибка: путь пустой.");
+
+            Console.WriteLine("Ошибка: путь пустой.");
             continue;
         }
         if (!File.Exists(importPath))
@@ -403,11 +397,11 @@ static void PrintTasks(List<TaskItem> tasks)
                 Console.WriteLine("Не удалось сделать backup: " +
                 ex.Message);
                 Console.WriteLine("Импорт отменён (без backup опасно).");
-            continue;
+                continue;
             }
         }
         Console.Write("Точно импортировать и заменить задачи? (y/n): ");
-    var sure = (ConsoleUi.ReadString() ?? "").Trim().ToLower();
+        var sure = (ConsoleUi.ReadString() ?? "").Trim().ToLower();
         if (sure != "y")
         {
             Console.WriteLine("Импорт отменён.");
@@ -416,7 +410,7 @@ static void PrintTasks(List<TaskItem> tasks)
 
         logger.Info($"IMPORT start file=\"{importPath}\"");
 
-        try
+        SafeRunner.Run("EXPORT", logger, () =>
         {
             var importStorage = new JsonTaskStorage(importPath);
             var importedTasks = importStorage.Load();
@@ -427,15 +421,10 @@ static void PrintTasks(List<TaskItem> tasks)
                 var error = TaskValidator.Validate(t);
                 if (error != null)
                 {
-                    Console.WriteLine($"Ошибка импорта: задача #{i + 1} не прошла проверку: { error}");
-                ok = false;
+                    Console.WriteLine($"Ошибка импорта: задача #{i + 1} не прошла проверку: {error}");
+                    ok = false;
                     break;
                 }
-            }
-            if (!ok)
-            {
-                Console.WriteLine("Импорт отменён.");
-                continue;
             }
             // Заменяем задачи в сервисе
             service.ReplaceAll(importedTasks);
@@ -443,17 +432,14 @@ static void PrintTasks(List<TaskItem> tasks)
             storage.Save(service.GetAll());
             Console.WriteLine("Импорт выполнен. Загружено задач:" + importedTasks.Count);
             logger.Info($"IMPORT success count={importedTasks.Count}");
-        }
-        catch (Exception ex)
-        {
-            logger.Error("IMPORT failed: " + ex.Message);
-            Console.WriteLine("Ошибка import: " + ex.Message);
-        }
+    });
         continue;
     }
 
     if (input == "12")
     {
+        SafeRunner.Run("STATS", logger, () =>
+        {
         var stats = service.GetStats();
         Console.WriteLine();
         Console.WriteLine("Статистика задач");
@@ -467,7 +453,10 @@ static void PrintTasks(List<TaskItem> tasks)
         var sum = stats.NewCount + stats.InProgressCount + stats.
         DoneCount;
         if (sum != stats.Total)
-        Console.WriteLine("ВНИМАНИЕ: сумма по статусам не равна общему количеству!");
+            Console.WriteLine("ВНИМАНИЕ: сумма по статусам не равна общему количеству!");
+
+    });
+
         continue;
     }
             
@@ -504,15 +493,11 @@ static void PrintTasks(List<TaskItem> tasks)
 
     if (input == "14")
     {
-        try
-        {
-            // Лог-файл за сегодня
+        SafeRunner.Run("SHOWLOG", logger,() =>
+        { 
+        // Лог-файл за сегодня
             var logFile = Path.Combine(logsFolder, $"app_{DateTime.Now:yyyy-MM-dd}.log");
-            if (!File.Exists(logFile))
-            {
-                Console.WriteLine("Лог за сегодня не найден.");
-                continue;
-            }
+            
             var lines = File.ReadAllLines(logFile);
             Console.WriteLine("Последние 20 строк лога:");
             Console.WriteLine("------------------------");
@@ -521,11 +506,7 @@ static void PrintTasks(List<TaskItem> tasks)
                 Console.WriteLine(lines[i]);
         
             Console.WriteLine("------------------------");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Ошибка чтения лога: " + ex.Message);
-        }
+        });
         continue;
     }
 
