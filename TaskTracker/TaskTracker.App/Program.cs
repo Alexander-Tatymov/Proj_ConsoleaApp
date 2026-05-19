@@ -10,6 +10,14 @@ using TaskTracker.Storage.Services;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using TaskTracker.Core.Storage;
 using TaskTracker.App.UI;
+using TaskTracker.App.Config;
+
+var baseDir = AppContext.BaseDirectory;
+var configPath = Path.Combine(baseDir, "config.json");
+var configService = new ConfigService(configPath);
+var cfg = configService.LoadOrCreateDefault();
+Console.WriteLine("Config: " + configPath);
+Console.WriteLine($"StorageMode: {cfg.StorageMode}, AskOnStart: { cfg.AskOnStart}");
 
 var dataFilePath = Path.Combine(AppContext.BaseDirectory, "data", "tasks.json");
 var backupsFolder = Path.Combine(AppContext.BaseDirectory, "backups");
@@ -18,13 +26,23 @@ var logsFolder = Path.Combine(AppContext.BaseDirectory, "logs");
 var logger = new AppLogger(logsFolder);
 logger.Info("Application started");
 // Хранилище JSON
-ITaskStorage storage;
-Console.WriteLine("Выберите хранилище:");
-Console.WriteLine("1 - JSON файл (обычный режим)");
-Console.WriteLine("2 - Memory (тестовый режим, данные пропадут после выхода)");
+string mode = (cfg.StorageMode ?? "Json").Trim();
+if (cfg.AskOnStart)
+{
+    Console.WriteLine("Выберите хранилище:");
+    Console.WriteLine("1 - JSON файл (обычный режим)");
+    Console.WriteLine("2 - Memory (данные пропадут после выхода)");
+
 Console.Write("Ваш выбор: ");
-var mode = (Console.ReadLine() ?? "").Trim();
-if (mode == "2")
+    var answer = (Console.ReadLine() ?? "").Trim();
+    mode = answer == "2" ? "Memory" : "Json";
+    // можно сохранить выбор в конфиг (удобно)
+    cfg.StorageMode = mode;
+    configService.Save(cfg);
+}
+
+ITaskStorage storage;
+if (string.Equals(mode, "Memory", StringComparison.OrdinalIgnoreCase))
 {
     storage = new MemoryTaskStorage();
     Console.WriteLine("Режим: MemoryStorage");
@@ -32,8 +50,7 @@ if (mode == "2")
 else
 {
     storage = new JsonTaskStorageAdapter(dataFilePath);
-
-Console.WriteLine("Режим: JsonStorage");
+    Console.WriteLine("Режим: JsonStorage");
 }
 
 // Загружаем задачи из файла
@@ -42,6 +59,9 @@ var loadedTasks = storage.Load();
 var service = new TaskService(loadedTasks);
 Console.WriteLine($"Данные: {dataFilePath}");
 Console.WriteLine($"Загружено задач: {loadedTasks.Count}");
+
+logger = new AppLogger(logsFolder);
+logger.Info("Application started");
 
 while (true)
 {
