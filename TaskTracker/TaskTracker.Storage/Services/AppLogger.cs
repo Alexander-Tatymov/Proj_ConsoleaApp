@@ -35,4 +35,16 @@ public class AppLogger
         var path = GetLogFilePath();
         File.AppendAllText(path, line + Environment.NewLine);
     }
+
+    public void Exception(string context, Exception ex)
+    {
+        Error($"{context}: {ex.Message}");
+
+        var errorFile = Path.Combine(_logDir, $"errors_{DateTime.Now:yyyy-MM-dd}.log");
+
+        var details = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} EXCEPTION {context} " +
+            $"{ Environment.NewLine} " + ex + Environment.NewLine +  
+            "----------------------------------------" + Environment.NewLine;
+        File.AppendAllText(errorFile, details);
+    }
 }
