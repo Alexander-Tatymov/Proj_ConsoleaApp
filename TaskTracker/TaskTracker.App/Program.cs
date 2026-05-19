@@ -530,6 +530,44 @@ static void PrintTasks(List<TaskItem> tasks)
         continue;
     }
 
+    if (input == "15")
+    {
+        SafeRunner.Run("SETTINGS", logger, () =>
+        {
+            Console.WriteLine("Текущие настройки:");
+            Console.WriteLine($"StorageMode: {cfg.StorageMode}");
+            Console.WriteLine($"AskOnStart: {cfg.AskOnStart}");
+            Console.WriteLine($"DataFolder: {cfg.DataFolder}");
+            Console.WriteLine($"LogsFolder: {cfg.LogsFolder}");
+            Console.WriteLine();
+            Console.WriteLine("Хотите сменить режим хранения?");
+            Console.WriteLine("1 - Json");
+            Console.WriteLine("2 - Memory");
+            Console.Write("Выбор (Enter - не менять): ");
+            var ans = (Console.ReadLine() ?? "").Trim();
+            if (ans == "1")
+            {
+                cfg.StorageMode = "Json";
+                configService.Save(cfg);
+                Console.WriteLine("Сохранено: StorageMode=Json. Перезапустите приложение.");
+                logger.Info("SETTINGS changed StorageMode=Json");
+            }
+            else if (ans == "2")
+            {
+                cfg.StorageMode = "Memory";
+                configService.Save(cfg);
+                Console.WriteLine("Сохранено: StorageMode=Memory.Перезапустите приложение.");
+                logger.Info("SETTINGS changed StorageMode=Memory");
+            }
+            else
+        
+            {
+                Console.WriteLine("Настройки не изменены.");
+            }
+        });
+        continue;
+    }
+
 }
 
 internal class task
