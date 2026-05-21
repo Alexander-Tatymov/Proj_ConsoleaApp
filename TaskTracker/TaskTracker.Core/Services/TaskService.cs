@@ -13,6 +13,55 @@ namespace TaskTracker.Core.Services;
 public class TaskService
 {
 
+    private int GetNextFreeId()
+    {
+        while (_tasks.Any(t => t.Id == _nextId))
+            _nextId++;
+        return _nextId++;
+    }
+
+    public (int added, int skipped) MergeImport(List<TaskItem> imported)
+    {
+
+        imported ??= new List<TaskItem>();
+        int added = 0;
+        int skipped = 0;
+        foreach (var t in imported)
+        {
+            if (t == null)
+            {
+                skipped++;
+                continue;
+            }
+            bool duplicate = _tasks.Any(x =>
+            string.Equals(x.Title, t.Title, StringComparison.
+            OrdinalIgnoreCase) &&
+            string.Equals(x.Description, t.Description, StringComparison.OrdinalIgnoreCase) &&
+            x.Status == t.Status
+            );
+            if (duplicate)
+            {
+                skipped++;
+                continue;
+            }
+            int newId = t.Id;
+            if (_tasks.Any(x => x.Id == newId))
+                newId = GetNextFreeId();
+            var copy = new TaskItem
+            {
+                Id = newId,
+                Title = t.Title ?? "",
+                Description = t.Description ?? "",
+            Status = t.Status
+            };
+            _tasks.Add(copy);
+            added++;
+        }
+        _nextId = _tasks.Count == 0 ? 1 : _tasks.Max(x => x.Id) +
+        1;
+        return (added, skipped);
+    }
+
     public List<TaskItem> SearchByTitle(string query)
     {
         query ??= "";
