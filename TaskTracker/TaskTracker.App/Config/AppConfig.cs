@@ -15,4 +15,6 @@ public bool AskOnStart { get; set; } = false;
     public string ExportsFolder { get; set; } = "exports";
     public string ReportsFolder { get; set; } = "reports";
     public string Role { get; set; } = "User";
+    public string LastFilterText { get; set; } = "";
+    public string LastFilterStatus { get; set; } = "Any";
 }
