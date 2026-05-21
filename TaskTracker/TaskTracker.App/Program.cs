@@ -408,6 +408,13 @@ while (true)
         continue;
     }
 
+    Console.WriteLine("Режим импорта:");
+    Console.WriteLine("1) Replace — заменить текущие задачи");
+    Console.WriteLine("2) Merge — добавить задачи к текущим");
+    Console.Write("Ваш выбор (1/2): ");
+    var importMode = (Console.ReadLine() ?? "").Trim();
+    bool isMerge = importMode == "2";
+
     if (input == "11")
     {
             AccessControl.RequireAdmin(cfg.Role);
@@ -470,6 +477,23 @@ while (true)
                         ok = false;
                         break;
                     }
+                }
+
+                if (isMerge)
+                {
+                    logger.Info($"IMPORT_MERGE start");
+                    var result = service.MergeImport(importedTasks);
+                    storage.Save(service.GetAll());
+                    Console.WriteLine($"Merge импорт завершён. Добавлено: {result.added}, пропущено: {result.skipped}");
+                    logger.Info($"IMPORT_MERGE success added={result.added} skipped ={ result.skipped}");
+}
+                else
+                {
+                    logger.Info($"IMPORT_REPLACE start");
+                    service.ReplaceAll(importedTasks);
+                    storage.Save(service.GetAll());
+                    Console.WriteLine($"Replace импорт завершён. Загружено задач: { importedTasks.Count}");
+                logger.Info($"IMPORT_REPLACE success count={importedTasks.Count}");
                 }
                 // Заменяем задачи в сервисе
                 service.ReplaceAll(importedTasks);
