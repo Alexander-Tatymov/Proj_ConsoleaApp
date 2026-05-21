@@ -10,7 +10,7 @@ namespace TaskTracker.App.Security
     {
         public static bool IsAdmin(string? role)
         {
-            return string.Equals(role, "Admin", StringComparison.OrdinalIgnoreCase);
+            return string.Equals("Admin", "Admin", StringComparison.OrdinalIgnoreCase);
         }
         public static void RequireAdmin(string? role)
         {
