@@ -34,6 +34,8 @@ public static class ConsoleUi
         Console.WriteLine("13) Экспорт отчёта в файл");
         Console.WriteLine("14) Показать последние строки лога");
         Console.WriteLine("15) Настройки (показать/сменить режим хранения)");
+        Console.WriteLine("17) Экспорт в CSV");
+        Console.WriteLine("18) Импорт из CSV (Replace/Merge)");
         Console.WriteLine("0) Выход");
 
         var version = typeof(Program).Assembly.GetName().Version?.ToString() ?? "unknown";

@@ -619,7 +619,66 @@ while (true)
             continue;
         }
 
+    if (input == "17")
+    {
+        SafeRunner.Run("EXPORT_CSV", logger, () =>
+        {
+            Directory.CreateDirectory(exportsFolder);
+            var csvFile = Path.Combine(
+            exportsFolder,
+            $"tasks_export_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv"
+            );
+            var csvStorage = new CsvTaskStorage(csvFile);
+
+            csvStorage.Save(service.GetAll());
+            Console.WriteLine("CSV экспорт выполнен: " + csvFile);
+            logger.Info($"EXPORT_CSV file=\"{csvFile}\"");
+        });
+        continue;
     }
+
+    if (input == "18")
+    {
+        SafeRunner.Run("IMPORT_CSV", logger, () =>
+        {
+            AccessControl.RequireAdmin(cfg.Role);
+            Console.Write("Введите путь к CSV-файлу: ");
+            var csvPath = (Console.ReadLine() ?? "").Trim();
+            if (string.IsNullOrWhiteSpace(csvPath))
+                throw new ArgumentException("Путь пустой.");
+            if (!File.Exists(csvPath))
+                throw new ArgumentException("Файл не найден: " +
+                csvPath);
+            Console.WriteLine("Режим импорта CSV:");
+            Console.WriteLine("1) Replace — заменить текущие задачи");
+            Console.WriteLine("2) Merge — добавить задачи к текущим");
+
+            Console.Write("Ваш выбор (1/2): ");
+            var mode = (Console.ReadLine() ?? "").Trim();
+            bool isMerge = mode == "2";
+            var csvStorage = new CsvTaskStorage(csvPath);
+            var loaded = csvStorage.Load();
+            var importedTasks = loaded.tasks;
+            var errors = loaded.errors;
+            if (isMerge)
+            {
+                var r = service.MergeImport(importedTasks);
+                storage.Save(service.GetAll());
+                Console.WriteLine($"CSV Merge: добавлено {r.added}, пропущено {r.skipped}, ошибок строк {errors}");
+                logger.Info($"IMPORT_CSV_MERGE added={r.added} skipped ={ r.skipped} errors ={ errors}");
+            }
+            else
+            {
+                service.ReplaceAll(importedTasks);
+                storage.Save(service.GetAll());
+                Console.WriteLine($"CSV Replace: загружено {importedTasks.Count}, ошибок строк {errors}");
+                logger.Info($"IMPORT_CSV_REPLACE count={importedTasks.Count} errors={errors}");
+            }
+        });
+        continue;
+    }
+
+}
 
 internal class task
 {
