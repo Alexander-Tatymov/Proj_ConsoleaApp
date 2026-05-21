@@ -68,7 +68,7 @@ if (TaskNormalizer.Normalize(loadedTasks[i]))
 var service = new TaskService(loadedTasks);
 if (changedCount > 0)
 {
-    storage.Save(service.GetAll());
+    storage.Save(service.GetAllActive());
     Console.WriteLine($"Миграция применена. Обновлено задач:{ changedCount}");
 logger.Info($"MIGRATION applied changedTasks={changedCount}");
 }
@@ -112,7 +112,7 @@ while (true)
 
     if (input == "3") // Изменить статус задачи
     {
-        var tasks = service.GetAll();
+        var tasks = service.GetAllActive();
         if (tasks.Count == 0)
         {
             Console.WriteLine("Список задач пуст. Нечего менять.");
@@ -152,7 +152,7 @@ while (true)
         try
         {
             var updated = service.ChangeStatus(id, newStatus);
-            storage.Save(service.GetAll());
+            storage.Save(service.GetAllActive());
             Console.WriteLine($"Статус изменён: #{updated.Id} {updated.Title} [{updated.Status}]");
         }
         catch (ArgumentException ex)
@@ -175,7 +175,7 @@ while (true)
 
     if (input == "5")
     {
-        var tasks = service.GetAll();
+        var tasks = service.GetAllActive();
         if (tasks.Count == 0)
         {
             Console.WriteLine("Список задач пуст. Нечего редактировать.");
@@ -203,7 +203,7 @@ while (true)
             var updated = service.Update(id, newTitle, newDescription);
             logger.Info($"UPDATE id={updated.Id} title=\"{updated.Title}\"");
             // Сохраняем в JSON после изменения
-            storage.Save(service.GetAll());
+            storage.Save(service.GetAllActive());
             Console.WriteLine("Задача обновлена:");
             Console.WriteLine($"{updated.Id}. {updated.Title} [{updated.Status}]");
             if (!string.IsNullOrWhiteSpace(updated.Description))
@@ -327,7 +327,7 @@ while (true)
             var exportStorage = new JsonTaskStorage(exportPath);
 
             // Получаем все задачи и сохраняем
-            var tasks = service.GetAll();
+            var tasks = service.GetAllActive();
             exportStorage.Save(tasks);
 
             Console.WriteLine($"✅ Экспорт выполнен! Задач сохранено: {tasks.Count}");
@@ -384,7 +384,7 @@ while (true)
         // Сохраним текущие данные на всякий случай
         SafeRunner.Run("BACKUP", logger, () =>
         {
-            storage.Save(service.GetAll());
+            storage.Save(service.GetAllActive());
             var backupPath = BackupService.CreateBackup(dataFilePath, backupsFolder);
             Console.WriteLine("Бэкап создан: " + backupPath);
             logger.Info($"BACKUP created file=\"{backupPath}\"");
@@ -401,7 +401,7 @@ while (true)
                 Directory.CreateDirectory(exportsFolder);
                 var exportFile = Path.Combine(exportsFolder, $"tasks_export_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.json");
                 var exportStorage = new JsonTaskStorage(exportFile);
-                exportStorage.Save(service.GetAll());
+                exportStorage.Save(service.GetAllActive());
                 Console.WriteLine("Экспорт выполнен: " + exportFile);
                 logger.Info($"EXPORT file=\"{exportFile}\"");
             });
@@ -440,7 +440,7 @@ while (true)
             {
                 try
                 {
-                    storage.Save(service.GetAll());
+                    storage.Save(service.GetAllActive());
                     var backupPath = BackupService.CreateBackup(dataFilePath, backupsFolder);
                     Console.WriteLine("Backup создан: " + backupPath);
                 }
@@ -483,7 +483,7 @@ while (true)
                 {
                     logger.Info($"IMPORT_MERGE start");
                     var result = service.MergeImport(importedTasks);
-                    storage.Save(service.GetAll());
+                    storage.Save(service.GetAllActive());
                     Console.WriteLine($"Merge импорт завершён. Добавлено: {result.added}, пропущено: {result.skipped}");
                     logger.Info($"IMPORT_MERGE success added={result.added} skipped ={ result.skipped}");
 }
@@ -491,14 +491,14 @@ while (true)
                 {
                     logger.Info($"IMPORT_REPLACE start");
                     service.ReplaceAll(importedTasks);
-                    storage.Save(service.GetAll());
+                    storage.Save(service.GetAllActive());
                     Console.WriteLine($"Replace импорт завершён. Загружено задач: { importedTasks.Count}");
                 logger.Info($"IMPORT_REPLACE success count={importedTasks.Count}");
                 }
                 // Заменяем задачи в сервисе
                 service.ReplaceAll(importedTasks);
                 // Сохраняем в основной файл data/tasks.json
-                storage.Save(service.GetAll());
+                storage.Save(service.GetAllActive());
                 Console.WriteLine("Импорт выполнен. Загружено задач:" + importedTasks.Count);
                 logger.Info($"IMPORT success count={importedTasks.Count}");
             });
@@ -630,7 +630,7 @@ while (true)
             );
             var csvStorage = new CsvTaskStorage(csvFile);
 
-            csvStorage.Save(service.GetAll());
+            csvStorage.Save(service.GetAllActive());
             Console.WriteLine("CSV экспорт выполнен: " + csvFile);
             logger.Info($"EXPORT_CSV file=\"{csvFile}\"");
         });
@@ -663,14 +663,14 @@ while (true)
             if (isMerge)
             {
                 var r = service.MergeImport(importedTasks);
-                storage.Save(service.GetAll());
+                storage.Save(service.GetAllActive());
                 Console.WriteLine($"CSV Merge: добавлено {r.added}, пропущено {r.skipped}, ошибок строк {errors}");
                 logger.Info($"IMPORT_CSV_MERGE added={r.added} skipped ={ r.skipped} errors ={ errors}");
             }
             else
             {
                 service.ReplaceAll(importedTasks);
-                storage.Save(service.GetAll());
+                storage.Save(service.GetAllActive());
                 Console.WriteLine($"CSV Replace: загружено {importedTasks.Count}, ошибок строк {errors}");
                 logger.Info($"IMPORT_CSV_REPLACE count={importedTasks.Count} errors={errors}");
             }

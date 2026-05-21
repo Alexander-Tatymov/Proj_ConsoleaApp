@@ -13,6 +13,7 @@ namespace TaskTracker.Core.Models;
     public TaskStatus Status { get; set; } = TaskStatus.New;
 
     public bool IsCompleted { get; internal set; }
+    public bool IsDeleted { get; set; } = false;
 
     public void Add(TaskItem task)
     {

@@ -16,4 +16,9 @@ public class JsonTaskStorageAdapter : ITaskStorage
     }
     public List<TaskItem> Load() => _json.Load();
     public void Save(List<TaskItem> tasks) => _json.Save(tasks);
+
+    public void Save()
+    {
+        throw new NotImplementedException();
+    }
 }

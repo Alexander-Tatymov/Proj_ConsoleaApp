@@ -10,6 +10,7 @@ using TaskStatus = TaskTracker.Core.Models.TaskStatus;
 
 
 namespace TaskTracker.Core.Services;
+
 public class TaskService
 {
 
@@ -52,7 +53,7 @@ public class TaskService
                 Id = newId,
                 Title = t.Title ?? "",
                 Description = t.Description ?? "",
-            Status = t.Status
+                Status = t.Status
             };
             _tasks.Add(copy);
             added++;
@@ -119,7 +120,7 @@ public class TaskService
         task.Title = task.Title.Trim();
         _tasks.Add(task);
         _nextId++;
-            return task;
+        return task;
     }
     public TaskItem Update(int id, string newTitle, string newDescription)
     {
@@ -144,7 +145,7 @@ public class TaskService
     private TaskItem GetExisting(int id)
     {
         var task = _tasks.FirstOrDefault(t => t.Id == id);
-        if (task is null)  throw new ArgumentException($"Задача с Id={id} не найдена.");
+        if (task is null) throw new ArgumentException($"Задача с Id={id} не найдена.");
         return task;
     }
 
@@ -204,6 +205,11 @@ status)
                 result.Add(t);
         }
         return result;
+    }
+
+    public List<TaskItem> GetAllActive()
+    {
+        return _tasks.Where(t => !t.IsDeleted).ToList();
     }
 
 }

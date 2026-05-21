@@ -15,7 +15,7 @@ public static class MenuHandlers
         try
         {
             var task = service.Add(title);
-            storage.Save(service.GetAll());
+            storage.Save();
             Console.WriteLine($"Задача добавлена: #{task.Id}{task.Title}[{task.Status}]");
             logger.Info($"ADD id={task.Id} title=\"{task.Title}\"");
         }
@@ -28,7 +28,7 @@ public static class MenuHandlers
 
     public static void ListTasks(TaskService service)
     {
-        var tasks = service.GetAll();
+        var tasks = service.GetAllActive();
         if (tasks.Count == 0)
         {
             Console.WriteLine("Список задач пуст.");
@@ -56,7 +56,7 @@ public static class MenuHandlers
         try
         {
             service.Delete(id);
-            storage.Save(service.GetAll());
+            storage.Save(service.GetAllActive());
             Console.WriteLine($"Задача с Id={id} удалена.");
             logger.Info($"DELETE id={id}");
         }

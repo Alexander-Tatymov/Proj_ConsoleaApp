@@ -34,4 +34,9 @@ _tasks = tasks.Select(t => new TaskItem
     Status = t.Status
 }).ToList();
     }
+
+    public void Save()
+    {
+        throw new NotImplementedException();
+    }
 }
