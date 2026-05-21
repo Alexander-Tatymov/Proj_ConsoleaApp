@@ -182,4 +182,28 @@ public class TaskService
         return stats;
     }
 
+    public List<TaskItem> SearchAdvanced(string? text, TaskStatus?
+status)
+    {
+        var query = (text ?? "").Trim();
+        var hasText = query.Length > 0;
+        var result = new List<TaskItem>();
+        foreach (var t in _tasks)
+        {
+            bool ok = true;
+            if (status.HasValue && t.Status != status.Value)
+                ok = false;
+            if (ok && hasText)
+            {
+                var inTitle = (t.Title ?? "").Contains(query, StringComparison.OrdinalIgnoreCase);
+                var inDesc = (t.Description ?? "").Contains(query, StringComparison.OrdinalIgnoreCase);
+                if (!inTitle && !inDesc)
+                    ok = false;
+            }
+            if (ok)
+                result.Add(t);
+        }
+        return result;
+    }
+
 }
