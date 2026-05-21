@@ -678,6 +678,59 @@ while (true)
         continue;
     }
 
+    if (input == "19")
+    {
+        SafeRunner.Run("ADV_FILTER", logger, () =>
+        {
+
+            Console.WriteLine("Расширенный фильтр");
+            Console.WriteLine("------------------");
+            Console.Write("Введите текст (Enter = пусто): ");
+            var text = (Console.ReadLine() ?? "").Trim();
+            Console.WriteLine("Выберите статус:");
+            Console.WriteLine("0 - Любой");
+            Console.WriteLine("1 - New");
+            Console.WriteLine("2 - InProgress");
+            Console.WriteLine("3 - Done");
+            Console.Write("Ваш выбор: ");
+            var s = (Console.ReadLine() ?? "").Trim();TaskTracker.Core.Models.TaskStatus? status = null;
+            if (s == "1") status = TaskTracker.Core.Models.TaskStatus.New;
+            else if(s == "2") status = TaskTracker.Core.Models.TaskStatus.InProgress;
+            else if(s == "3") status = TaskTracker.Core.Models.TaskStatus.Done;
+            var filtered = service.SearchAdvanced(text, status);
+            ConsoleUi.PrintTasks(filtered);
+            cfg.LastFilterText = text;
+            cfg.LastFilterStatus = status.HasValue ? status.Value.ToString() :"Any";
+            configService.Save(cfg);
+            logger.Info($"ADV_FILTER text=\"{cfg.LastFilterText}\" status={cfg.LastFilterStatus} count={filtered.Count}");
+        });
+        continue;
+
+}
+
+    if (input == "20")
+    {
+        SafeRunner.Run("ADV_FILTER_REPEAT", logger, () =>
+        {
+            var text = cfg.LastFilterText ?? "";
+            var statusText = (cfg.LastFilterStatus ?? "Any").Trim();
+            TaskTracker.Core.Models.TaskStatus? status = null;
+            if (!string.Equals(statusText, "Any", StringComparison.OrdinalIgnoreCase))
+            {
+                if (Enum.TryParse<TaskTracker.Core.Models.TaskStatus>(statusText, out var parsed))
+                    status = parsed;
+            }
+            Console.WriteLine("Повтор фильтра:");
+            Console.WriteLine($"Текст: {text}");
+            Console.WriteLine($"Статус: {statusText}");
+            var filtered = service.SearchAdvanced(text, status);
+            ConsoleUi.PrintTasks(filtered);
+            logger.Info($"ADV_FILTER_REPEAT text=\"{text}\" status ={ statusText} count ={ filtered.Count}");
+        });
+        continue;
+
+}
+
 }
 
 internal class task
