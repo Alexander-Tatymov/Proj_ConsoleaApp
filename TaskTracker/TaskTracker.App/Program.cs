@@ -12,6 +12,7 @@ using TaskTracker.Core.Storage;
 using TaskTracker.App.UI;
 using TaskTracker.App.Config;
 using TaskTracker.App.Security;
+using TaskTracker.Core.Migration;
 
 var baseDir = AppContext.BaseDirectory;
 var configPath = Path.Combine(baseDir, "config.json");
@@ -58,8 +59,24 @@ else
 
 // Загружаем задачи из файла
 var loadedTasks = storage.Load();
-// Создаём сервис с уже загруженными задачами
+int changedCount = 0;
+for (int i = 0; i < loadedTasks.Count; i++)
+{ 
+if (TaskNormalizer.Normalize(loadedTasks[i]))
+        changedCount++;
+}
 var service = new TaskService(loadedTasks);
+if (changedCount > 0)
+{
+    storage.Save(service.GetAll());
+    Console.WriteLine($"Миграция применена. Обновлено задач:{ changedCount}");
+logger.Info($"MIGRATION applied changedTasks={changedCount}");
+}
+else
+{
+    Console.WriteLine("Миграция не требуется.");
+    logger.Info("MIGRATION not needed");
+}
 Console.WriteLine($"Данные: {dataFilePath}");
 Console.WriteLine($"Загружено задач: {loadedTasks.Count}");
 
