@@ -728,14 +728,71 @@ while (true)
             Console.WriteLine($"Статус: {statusText}");
             var filtered = service.SearchAdvanced(text, status);
             ConsoleUi.PrintTasks(filtered);
-            logger.Info($"ADV_FILTER_REPEAT text=\"{text}\" status ={ statusText} count ={ filtered.Count}");
+            logger.Info($"ADV_FILTER_REPEAT text=\"{text}\" status ={statusText} count ={filtered.Count}");
         });
         continue;
 
+
+    }   
+    
+    if (input == "21")
+        {
+            SafeRunner.Run("TRASH_LIST", logger, () =>
+            {
+                var trash = service.GetTrash();
+                Console.WriteLine("Корзина:");
+                ConsoleUi.PrintTasks(trash);
+                logger.Info($"TRASH_LIST count={trash.Count}");
+            });
+            continue;
+        }
+
+
+    if (input == "22")
+    {
+    SafeRunner.Run("TRASH_RESTORE", logger, () =>
+    {
+    var trash = service.GetTrash();
+    ConsoleUi.PrintTasks(trash);
+    Console.Write("Введите Id для восстановления: ");
+    var text = (Console.ReadLine() ?? "").Trim();
+    if (!int.TryParse(text, out var id))
+        throw new ArgumentException("Id должно быть числом.");
+    service.Restore(id);
+    storage.Save(service.GetAll());
+    Console.WriteLine($"Задача Id={id} восстановлена.");
+    logger.Info($"RESTORE id={id}");
+});
+    continue;
 }
 
-}
+    if (input == "23")
+    {
+        SafeRunner.Run("TRASH_CLEAR", logger, () =>
+        {
+            AccessControl.RequireAdmin(cfg.Role);
+            var trash = service.GetTrash();
+            if (trash.Count == 0)
+            {
+                Console.WriteLine("Корзина пустая.");
+                return;
+            }
+        Console.Write("Удалить навсегда все задачи из корзины ? (y / n) : ");
+        var ans = (Console.ReadLine() ?? "").Trim().ToLower();
+            if (ans != "y")
+            {
+                Console.WriteLine("Очистка отменена.");
+                return;
+            }
+            var removed = service.ClearTrash();
+            storage.Save(service.GetAll());
+            Console.WriteLine($"Корзина очищена. Удалено: {removed}");
+            logger.Info($"TRASH_CLEAR removed={removed}");
+        });
+        continue;
+    }
 
+}
 internal class task
 {
 }

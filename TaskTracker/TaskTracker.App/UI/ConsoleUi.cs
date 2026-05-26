@@ -38,6 +38,9 @@ public static class ConsoleUi
         Console.WriteLine("18) Импорт из CSV (Replace/Merge)");
         Console.WriteLine("19) Расширенный поиск/фильтр");
         Console.WriteLine("20) Повторить последний фильтр");
+        Console.WriteLine("21) Показать корзину");
+        Console.WriteLine("22) Восстановить из корзины");
+        Console.WriteLine("23) Очистить корзину (удалить навсегда)");
         Console.WriteLine("0) Выход");
 
         var version = typeof(Program).Assembly.GetName().Version?.ToString() ?? "unknown";
