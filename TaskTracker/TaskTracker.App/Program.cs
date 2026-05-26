@@ -171,6 +171,9 @@ while (true)
             MenuHandlers.DeleteTask(service, storage, logger);
         });
         continue;
+        object id = null;
+        Console.WriteLine($"Задача Id={id} отправлена в корзину.");
+        logger.Info($"DELETE_SOFT id={id}");
     }
 
     if (input == "5")

@@ -158,7 +158,9 @@ public class TaskService
     public void Delete(int id)
     {
         var task = GetExisting(id);
-        _tasks.Remove(task);
+        if (task.IsDeleted)
+            throw new ArgumentException("Задача уже в корзине.");
+        task.IsDeleted = true;
     }
 
     public void ReplaceAll(List<TaskItem> newTasks)
@@ -205,6 +207,26 @@ status)
                 result.Add(t);
         }
         return result;
+    }
+
+    public List<TaskItem> GetTrash()
+    {
+        return _tasks.Where(t => t.IsDeleted).ToList();
+    }
+    public void Restore(int id)
+    {
+        var task = GetExisting(id);
+        if (!task.IsDeleted)
+        throw new ArgumentException("Задача не находится в корзине.");
+        task.IsDeleted = false;
+    }
+    public int ClearTrash()
+    {
+        int before = _tasks.Count;
+        _tasks.RemoveAll(t => t.IsDeleted);
+        int removed = before - _tasks.Count;
+        _nextId = _tasks.Count == 0 ? 1 : _tasks.Max(x => x.Id) + 1;
+        return removed;
     }
 
     public List<TaskItem> GetAllActive()
