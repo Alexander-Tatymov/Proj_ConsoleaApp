@@ -447,126 +447,126 @@ while (true)
 
         AccessControl.RequireAdmin(cfg.Role);
 
-            Console.WriteLine("Импорт заменит текущий список задач!");
-            Console.Write("Введите путь к JSON-файлу для импорта: ");
-            var importPath = (ConsoleUi.ReadString() ?? "").Trim();
-            if (string.IsNullOrWhiteSpace(importPath))
-            {
-
-
-                Console.WriteLine("Ошибка: путь пустой.");
-                continue;
-            }
-            if (!File.Exists(importPath))
-            {
-                Console.WriteLine("Ошибка: файл не найден: " + importPath);
-                continue;
-            }
-            Console.Write("Сделать backup перед импортом? (y/n): ");
-            var backupAnswer = (ConsoleUi.ReadString() ?? "").Trim().ToLower();
-            if (backupAnswer == "y")
-            {
-                try
-                {
-                    storage.Save(service.GetAllActive());
-                    var backupPath = BackupService.CreateBackup(dataFilePath, backupsFolder);
-                    Console.WriteLine("Backup создан: " + backupPath);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Не удалось сделать backup: " +
-                    ex.Message);
-                    Console.WriteLine("Импорт отменён (без backup опасно).");
-                    continue;
-                }
-            }
-            Console.Write("Точно импортировать и заменить задачи? (y/n): ");
-            var sure = (ConsoleUi.ReadString() ?? "").Trim().ToLower();
-            if (sure != "y")
-            {
-                Console.WriteLine("Импорт отменён.");
-                continue;
-            }
-
-            logger.Info($"IMPORT start file=\"{importPath}\"");
-
-            SafeRunner.Run("EXPORT", logger, () =>
-            {
-                var importStorage = new JsonTaskStorage(importPath);
-                var importedTasks = importStorage.Load();
-                bool ok = true;
-                for (int i = 0; i < importedTasks.Count; i++)
-                {
-                    var t = importedTasks[i];
-                    var error = TaskValidator.Validate(t);
-                    if (error != null)
-                    {
-                        Console.WriteLine($"Ошибка импорта: задача #{i + 1} не прошла проверку: {error}");
-                        ok = false;
-                        break;
-                    }
-                }
-
-                if (isMerge)
-                {
-                    logger.Info($"IMPORT_MERGE start");
-                    var result = service.MergeImport(importedTasks);
-                    storage.Save(service.GetAllActive());
-                    Console.WriteLine($"Merge импорт завершён. Добавлено: {result.added}, пропущено: {result.skipped}");
-                    logger.Info($"IMPORT_MERGE success added={result.added} skipped ={ result.skipped}");
-}
-                else
-                {
-                    logger.Info($"IMPORT_REPLACE start");
-                    service.ReplaceAll(importedTasks);
-                    storage.Save(service.GetAllActive());
-                    Console.WriteLine($"Replace импорт завершён. Загружено задач: { importedTasks.Count}");
-                logger.Info($"IMPORT_REPLACE success count={importedTasks.Count}");
-                }
-                // Заменяем задачи в сервисе
-                service.ReplaceAll(importedTasks);
-                // Сохраняем в основной файл data/tasks.json
-                storage.Save(service.GetAllActive());
-                Console.WriteLine("Импорт выполнен. Загружено задач:" + importedTasks.Count);
-                logger.Info($"IMPORT success count={importedTasks.Count}");
-            });
-            continue;
-        }
-
-        if (input == "12")
+        Console.WriteLine("Импорт заменит текущий список задач!");
+        Console.Write("Введите путь к JSON-файлу для импорта: ");
+        var importPath = (ConsoleUi.ReadString() ?? "").Trim();
+        if (string.IsNullOrWhiteSpace(importPath))
         {
-            SafeRunner.Run("STATS", logger, () =>
-            {
-                var stats = service.GetStats();
-                Console.WriteLine();
-                Console.WriteLine("Статистика задач");
-                Console.WriteLine("----------------");
-                Console.WriteLine($"Всего задач: {stats.Total}");
-                Console.WriteLine($"New: {stats.NewCount}");
-                Console.WriteLine($"InProgress: {stats.InProgressCount}");
-                Console.WriteLine($"Done: {stats.DoneCount}");
-                Console.WriteLine("----------------");
-                // простая проверка: сумма должна равняться total
-                var sum = stats.NewCount + stats.InProgressCount + stats.
-            DoneCount;
-                if (sum != stats.Total)
-                    Console.WriteLine("ВНИМАНИЕ: сумма по статусам не равна общему количеству!");
 
-            });
 
+            Console.WriteLine("Ошибка: путь пустой.");
             continue;
         }
-
-        if (input == "13")
+        if (!File.Exists(importPath))
+        {
+            Console.WriteLine("Ошибка: файл не найден: " + importPath);
+            continue;
+        }
+        Console.Write("Сделать backup перед импортом? (y/n): ");
+        var backupAnswer = (ConsoleUi.ReadString() ?? "").Trim().ToLower();
+        if (backupAnswer == "y")
         {
             try
             {
+                storage.Save(service.GetAllActive());
+                var backupPath = BackupService.CreateBackup(dataFilePath, backupsFolder);
+                Console.WriteLine("Backup создан: " + backupPath);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Не удалось сделать backup: " +
+                ex.Message);
+                Console.WriteLine("Импорт отменён (без backup опасно).");
+                continue;
+            }
+        }
+        Console.Write("Точно импортировать и заменить задачи? (y/n): ");
+        var sure = (ConsoleUi.ReadString() ?? "").Trim().ToLower();
+        if (sure != "y")
+        {
+            Console.WriteLine("Импорт отменён.");
+            continue;
+        }
+
+        logger.Info($"IMPORT start file=\"{importPath}\"");
+
+        SafeRunner.Run("EXPORT", logger, () =>
+        {
+            var importStorage = new JsonTaskStorage(importPath);
+            var importedTasks = importStorage.Load();
+            bool ok = true;
+            for (int i = 0; i < importedTasks.Count; i++)
+            {
+                var t = importedTasks[i];
+                var error = TaskValidator.Validate(t);
+                if (error != null)
+                {
+                    Console.WriteLine($"Ошибка импорта: задача #{i + 1} не прошла проверку: {error}");
+                    ok = false;
+                    break;
+                }
+            }
+
+            if (isMerge)
+            {
+                logger.Info($"IMPORT_MERGE start");
+                var result = service.MergeImport(importedTasks);
+                storage.Save(service.GetAllActive());
+                Console.WriteLine($"Merge импорт завершён. Добавлено: {result.added}, пропущено: {result.skipped}");
+                logger.Info($"IMPORT_MERGE success added={result.added} skipped ={result.skipped}");
+            }
+            else
+            {
+                logger.Info($"IMPORT_REPLACE start");
+                service.ReplaceAll(importedTasks);
+                storage.Save(service.GetAllActive());
+                Console.WriteLine($"Replace импорт завершён. Загружено задач: {importedTasks.Count}");
+                logger.Info($"IMPORT_REPLACE success count={importedTasks.Count}");
+            }
+            // Заменяем задачи в сервисе
+            service.ReplaceAll(importedTasks);
+            // Сохраняем в основной файл data/tasks.json
+            storage.Save(service.GetAllActive());
+            Console.WriteLine("Импорт выполнен. Загружено задач:" + importedTasks.Count);
+            logger.Info($"IMPORT success count={importedTasks.Count}");
+        });
+        continue;
+    }
+
+    if (input == "12")
+    {
+        SafeRunner.Run("STATS", logger, () =>
+        {
+            var stats = service.GetStats();
+            Console.WriteLine();
+            Console.WriteLine("Статистика задач");
+            Console.WriteLine("----------------");
+            Console.WriteLine($"Всего задач: {stats.Total}");
+            Console.WriteLine($"New: {stats.NewCount}");
+            Console.WriteLine($"InProgress: {stats.InProgressCount}");
+            Console.WriteLine($"Done: {stats.DoneCount}");
+            Console.WriteLine("----------------");
+            // простая проверка: сумма должна равняться total
+            var sum = stats.NewCount + stats.InProgressCount + stats.
+        DoneCount;
+            if (sum != stats.Total)
+                Console.WriteLine("ВНИМАНИЕ: сумма по статусам не равна общему количеству!");
+
+        });
+
+        continue;
+    }
+
+    if (input == "13")
+    {
+        try
+        {
             Directory.CreateDirectory((string?)Path.Combine(AppContext.BaseDirectory, "reports"));
 
-                var stats = service.GetStats();
-                var filePath = Path.Combine((string?)Path.Combine(AppContext.BaseDirectory, "reports"), $"report_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.txt");
+            var stats = service.GetStats();
+            var filePath = Path.Combine((string?)Path.Combine(AppContext.BaseDirectory, "reports"), $"report_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.txt");
 
-                var lines = new List<string>
+            var lines = new List<string>
             {
                 "TaskTracker Report",
                 "------------------",
@@ -577,74 +577,74 @@ while (true)
                 $"Done: {stats.DoneCount}",
             };
 
-                File.WriteAllLines(filePath, lines);
-                Console.WriteLine("Отчёт сохранён: " + filePath);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Ошибка экспорта отчёта: " + ex.Message);
-            }
-            continue;
+            File.WriteAllLines(filePath, lines);
+            Console.WriteLine("Отчёт сохранён: " + filePath);
         }
-
-        if (input == "14")
+        catch (Exception ex)
         {
-            SafeRunner.Run("SHOWLOG", logger, () =>
-            {
-                // Лог-файл за сегодня
-                var logFile = Path.Combine(logsFolder, $"app_{DateTime.Now:yyyy-MM-dd}.log");
-
-                var lines = File.ReadAllLines(logFile);
-                Console.WriteLine("Последние 20 строк лога:");
-                Console.WriteLine("------------------------");
-                int start = Math.Max(0, lines.Length - 20);
-                for (int i = start; i < lines.Length; i++)
-                    Console.WriteLine(lines[i]);
-
-                Console.WriteLine("------------------------");
-            });
-            continue;
+            Console.WriteLine("Ошибка экспорта отчёта: " + ex.Message);
         }
+        continue;
+    }
 
-        if (input == "15")
+    if (input == "14")
+    {
+        SafeRunner.Run("SHOWLOG", logger, () =>
         {
-            SafeRunner.Run("SETTINGS", logger, () =>
+            // Лог-файл за сегодня
+            var logFile = Path.Combine(logsFolder, $"app_{DateTime.Now:yyyy-MM-dd}.log");
+
+            var lines = File.ReadAllLines(logFile);
+            Console.WriteLine("Последние 20 строк лога:");
+            Console.WriteLine("------------------------");
+            int start = Math.Max(0, lines.Length - 20);
+            for (int i = start; i < lines.Length; i++)
+                Console.WriteLine(lines[i]);
+
+            Console.WriteLine("------------------------");
+        });
+        continue;
+    }
+
+    if (input == "15")
+    {
+        SafeRunner.Run("SETTINGS", logger, () =>
+        {
+            AccessControl.RequireAdmin(cfg.Role);
+
+            Console.WriteLine("Текущие настройки:");
+            Console.WriteLine($"StorageMode: {cfg.StorageMode}");
+            Console.WriteLine($"AskOnStart: {cfg.AskOnStart}");
+            Console.WriteLine($"DataFolder: {cfg.DataFolder}");
+            Console.WriteLine($"LogsFolder: {cfg.LogsFolder}");
+            Console.WriteLine();
+            Console.WriteLine("Хотите сменить режим хранения?");
+            Console.WriteLine("1 - Json");
+            Console.WriteLine("2 - Memory");
+            Console.Write("Выбор (Enter - не менять): ");
+            var ans = (Console.ReadLine() ?? "").Trim();
+            if (ans == "1")
             {
-                AccessControl.RequireAdmin(cfg.Role);
+                cfg.StorageMode = "Json";
+                configService.Save(cfg);
+                Console.WriteLine("Сохранено: StorageMode=Json. Перезапустите приложение.");
+                logger.Info("SETTINGS changed StorageMode=Json");
+            }
+            else if (ans == "2")
+            {
+                cfg.StorageMode = "Memory";
+                configService.Save(cfg);
+                Console.WriteLine("Сохранено: StorageMode=Memory.Перезапустите приложение.");
+                logger.Info("SETTINGS changed StorageMode=Memory");
+            }
+            else
 
-                Console.WriteLine("Текущие настройки:");
-                Console.WriteLine($"StorageMode: {cfg.StorageMode}");
-                Console.WriteLine($"AskOnStart: {cfg.AskOnStart}");
-                Console.WriteLine($"DataFolder: {cfg.DataFolder}");
-                Console.WriteLine($"LogsFolder: {cfg.LogsFolder}");
-                Console.WriteLine();
-                Console.WriteLine("Хотите сменить режим хранения?");
-                Console.WriteLine("1 - Json");
-                Console.WriteLine("2 - Memory");
-                Console.Write("Выбор (Enter - не менять): ");
-                var ans = (Console.ReadLine() ?? "").Trim();
-                if (ans == "1")
-                {
-                    cfg.StorageMode = "Json";
-                    configService.Save(cfg);
-                    Console.WriteLine("Сохранено: StorageMode=Json. Перезапустите приложение.");
-                    logger.Info("SETTINGS changed StorageMode=Json");
-                }
-                else if (ans == "2")
-                {
-                    cfg.StorageMode = "Memory";
-                    configService.Save(cfg);
-                    Console.WriteLine("Сохранено: StorageMode=Memory.Перезапустите приложение.");
-                    logger.Info("SETTINGS changed StorageMode=Memory");
-                }
-                else
-
-                {
-                    Console.WriteLine("Настройки не изменены.");
-                }
-            });
-            continue;
-        }
+            {
+                Console.WriteLine("Настройки не изменены.");
+            }
+        });
+        continue;
+    }
 
     if (input == "17")
     {
@@ -695,7 +695,7 @@ while (true)
                 var r = service.MergeImport(importedTasks);
                 storage.Save(service.GetAllActive());
                 Console.WriteLine($"CSV Merge: добавлено {r.added}, пропущено {r.skipped}, ошибок строк {errors}");
-                logger.Info($"IMPORT_CSV_MERGE added={r.added} skipped ={ r.skipped} errors ={ errors}");
+                logger.Info($"IMPORT_CSV_MERGE added={r.added} skipped ={r.skipped} errors ={errors}");
             }
             else
             {
@@ -723,20 +723,20 @@ while (true)
             Console.WriteLine("2 - InProgress");
             Console.WriteLine("3 - Done");
             Console.Write("Ваш выбор: ");
-            var s = (Console.ReadLine() ?? "").Trim();TaskTracker.Core.Models.TaskStatus? status = null;
+            var s = (Console.ReadLine() ?? "").Trim(); TaskTracker.Core.Models.TaskStatus? status = null;
             if (s == "1") status = TaskTracker.Core.Models.TaskStatus.New;
-            else if(s == "2") status = TaskTracker.Core.Models.TaskStatus.InProgress;
-            else if(s == "3") status = TaskTracker.Core.Models.TaskStatus.Done;
+            else if (s == "2") status = TaskTracker.Core.Models.TaskStatus.InProgress;
+            else if (s == "3") status = TaskTracker.Core.Models.TaskStatus.Done;
             var filtered = service.SearchAdvanced(text, status);
             ConsoleUi.PrintTasks(filtered);
             cfg.LastFilterText = text;
-            cfg.LastFilterStatus = status.HasValue ? status.Value.ToString() :"Any";
+            cfg.LastFilterStatus = status.HasValue ? status.Value.ToString() : "Any";
             configService.Save(cfg);
             logger.Info($"ADV_FILTER text=\"{cfg.LastFilterText}\" status={cfg.LastFilterStatus} count={filtered.Count}");
         });
         continue;
 
-}
+    }
 
     if (input == "20")
     {
@@ -760,38 +760,38 @@ while (true)
         continue;
 
 
-    }   
-    
+    }
+
     if (input == "21")
+    {
+        SafeRunner.Run("TRASH_LIST", logger, () =>
         {
-            SafeRunner.Run("TRASH_LIST", logger, () =>
-            {
-                var trash = service.GetTrash();
-                Console.WriteLine("Корзина:");
-                ConsoleUi.PrintTasks(trash);
-                logger.Info($"TRASH_LIST count={trash.Count}");
-            });
-            continue;
-        }
+            var trash = service.GetTrash();
+            Console.WriteLine("Корзина:");
+            ConsoleUi.PrintTasks(trash);
+            logger.Info($"TRASH_LIST count={trash.Count}");
+        });
+        continue;
+    }
 
 
     if (input == "22")
     {
-    SafeRunner.Run("TRASH_RESTORE", logger, () =>
-    {
-    var trash = service.GetTrash();
-    ConsoleUi.PrintTasks(trash);
-    Console.Write("Введите Id для восстановления: ");
-    var text = (Console.ReadLine() ?? "").Trim();
-    if (!int.TryParse(text, out var id))
-        throw new ArgumentException("Id должно быть числом.");
-    service.Restore(id);
-    storage.Save(service.GetAll());
-    Console.WriteLine($"Задача Id={id} восстановлена.");
-    logger.Info($"RESTORE id={id}");
-});
-    continue;
-}
+        SafeRunner.Run("TRASH_RESTORE", logger, () =>
+        {
+            var trash = service.GetTrash();
+            ConsoleUi.PrintTasks(trash);
+            Console.Write("Введите Id для восстановления: ");
+            var text = (Console.ReadLine() ?? "").Trim();
+            if (!int.TryParse(text, out var id))
+                throw new ArgumentException("Id должно быть числом.");
+            service.Restore(id);
+            storage.Save(service.GetAll());
+            Console.WriteLine($"Задача Id={id} восстановлена.");
+            logger.Info($"RESTORE id={id}");
+        });
+        continue;
+    }
 
     if (input == "23")
     {
@@ -805,7 +805,7 @@ while (true)
                 return;
             }
 
-        Console.Write("Удалить навсегда все задачи из корзины ? (y / n) : ");
+            Console.Write("Удалить навсегда все задачи из корзины ? (y / n) : ");
             Console.WriteLine("ВНИМАНИЕ: очистка корзины удаляет задачи НАВСЕГДА.");
             var ans = (Console.ReadLine() ?? "").Trim().ToLower();
             if (ans != "y")
@@ -825,24 +825,24 @@ while (true)
     {
         SafeRunner.Run("ARCHIVE", logger, () =>
         {
-        var active = service.GetAllActive();
-        ConsoleUi.PrintTasks(active);
+            var active = service.GetAllActive();
+            ConsoleUi.PrintTasks(active);
 
-        Console.Write("Введите Id для архивации: ");
-        var text = (Console.ReadLine() ?? "").Trim();
+            Console.Write("Введите Id для архивации: ");
+            var text = (Console.ReadLine() ?? "").Trim();
 
-        if (!int.TryParse(text, out var id))
-            throw new ArgumentException("Id должно быть числом.");
+            if (!int.TryParse(text, out var id))
+                throw new ArgumentException("Id должно быть числом.");
 
-        service.Archive(id);
-        storage.Save(service.GetAll());
+            service.Archive(id);
+            storage.Save(service.GetAll());
 
-        Console.WriteLine($"Задача Id={id} отправлена в архив.");
-        logger.Info($"ARCHIVE id={id}");
-    });
+            Console.WriteLine($"Задача Id={id} отправлена в архив.");
+            logger.Info($"ARCHIVE id={id}");
+        });
 
-    continue;
-}
+        continue;
+    }
 
     if (input == "25")
     {
@@ -861,24 +861,24 @@ while (true)
     {
         SafeRunner.Run("UNARCHIVE", logger, () =>
         {
-        var archive = service.GetArchive();
-        ConsoleUi.PrintTasks(archive);
+            var archive = service.GetArchive();
+            ConsoleUi.PrintTasks(archive);
 
-        Console.Write("Введите Id для возврата: ");
-        var text = (Console.ReadLine() ?? "").Trim();
+            Console.Write("Введите Id для возврата: ");
+            var text = (Console.ReadLine() ?? "").Trim();
 
-        if (!int.TryParse(text, out var id))
-            throw new ArgumentException("Id должно быть числом.");
+            if (!int.TryParse(text, out var id))
+                throw new ArgumentException("Id должно быть числом.");
 
-        service.Unarchive(id);
-        storage.Save(service.GetAll());
+            service.Unarchive(id);
+            storage.Save(service.GetAll());
 
-        Console.WriteLine($"Задача Id={id} возвращена из архива.");
-        logger.Info($"UNARCHIVE id={id}");
-    });
+            Console.WriteLine($"Задача Id={id} возвращена из архива.");
+            logger.Info($"UNARCHIVE id={id}");
+        });
 
-    continue;
-}
+        continue;
+    }
 
     if (input == "27")
     {
@@ -895,12 +895,12 @@ while (true)
     {
         SafeRunner.Run("DIAGNOSTICS", logger, () =>
 {
-        var lines = diagnostics.Run(service);
-        for (int i = 0; i < lines.Count; i++)
-        {
+    var lines = diagnostics.Run(service);
+    for (int i = 0; i < lines.Count; i++)
+    {
         string? linein = lines[i];
         Console.WriteLine(lines);
-        }
+    }
 
     logger.Info("DIAGNOSTICS ran");
 });
