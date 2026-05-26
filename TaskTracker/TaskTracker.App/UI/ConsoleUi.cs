@@ -45,6 +45,8 @@ public static class ConsoleUi
         Console.WriteLine("25) Показать архив");
         Console.WriteLine("26) Вернуть из архива");
         Console.WriteLine("27) Справка (Help)");
+        Console.WriteLine("28) Диагностика");
+        Console.WriteLine("29) Собрать отчёт для поддержки");
         Console.WriteLine("0) Выход");
 
         var version = typeof(Program).Assembly.GetName().Version?.ToString() ?? "unknown";

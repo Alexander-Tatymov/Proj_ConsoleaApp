@@ -14,6 +14,8 @@ using TaskTracker.App.Config;
 using TaskTracker.App.Security;
 using TaskTracker.Core.Migration;
 using TaskTracker.App.Help;
+using TaskTracker.App.Support;
+using System.Formats.Tar;
 
 var baseDir = AppContext.BaseDirectory;
 var configPath = Path.Combine(baseDir, "config.json");
@@ -24,10 +26,26 @@ Console.WriteLine($"Role: {cfg.Role}");
 Console.WriteLine("Config: " + configPath);
 Console.WriteLine($"StorageMode: {cfg.StorageMode}, AskOnStart: { cfg.AskOnStart}");
 
-var dataFilePath = Path.Combine(AppContext.BaseDirectory, "data", "tasks.json");
+var dataFolder = Path.Combine(AppContext.BaseDirectory, "data");
 var backupsFolder = Path.Combine(AppContext.BaseDirectory, "backups");
 var exportsFolder = Path.Combine(AppContext.BaseDirectory, "exports");
 var logsFolder = Path.Combine(AppContext.BaseDirectory, "logs");
+var reportsFolder = Path.Combine(AppContext.BaseDirectory, "reports");
+var dataFilePath = Path.Combine(dataFolder, "tasks.json");
+
+
+var diagnostics = new DiagnosticsService(
+baseDir,
+configPath,
+cfg,
+dataFolder,
+logsFolder,
+backupsFolder,
+exportsFolder,
+reportsFolder,
+dataFilePath
+);
+
 var logger = new AppLogger(logsFolder);
 logger.Info("Application started");
 // Хранилище JSON
@@ -81,13 +99,16 @@ else
 Console.WriteLine($"Данные: {dataFilePath}");
 Console.WriteLine($"Загружено задач: {loadedTasks.Count}");
 
+
+
 logger = new AppLogger(logsFolder);
 logger.Info("Application started");
+
+
 
 while (true)
 {
     Console.WriteLine();
-    Console.WriteLine("TaskTracker v0.2");
     ConsoleUi.PrintHeader();
     ConsoleUi.PrintMenu();
     var input = ConsoleUi.ReadString("Выберите пункт меню: ").Trim();
@@ -540,11 +561,10 @@ while (true)
         {
             try
             {
-                var reportsFolder = Path.Combine(AppContext.BaseDirectory, "reports");
-                Directory.CreateDirectory(reportsFolder);
+            Directory.CreateDirectory((string?)Path.Combine(AppContext.BaseDirectory, "reports"));
 
                 var stats = service.GetStats();
-                var filePath = Path.Combine(reportsFolder, $"report_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.txt");
+                var filePath = Path.Combine((string?)Path.Combine(AppContext.BaseDirectory, "reports"), $"report_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.txt");
 
                 var lines = new List<string>
             {
@@ -871,7 +891,38 @@ while (true)
         continue;
     }
 
+    if (input == "28")
+    {
+        SafeRunner.Run("DIAGNOSTICS", logger, () =>
+{
+        var lines = diagnostics.Run(service);
+        for (int i = 0; i < lines.Count; i++)
+        {
+        string? linein = lines[i];
+        Console.WriteLine(lines);
+        }
 
+    logger.Info("DIAGNOSTICS ran");
+});
+        continue;
+    }
+
+    if (input == "29")
+    {
+        SafeRunner.Run("SUPPORT_REPORT", logger, () =>
+        {
+            Directory.CreateDirectory(reportsFolder);
+            var lines = diagnostics.Run(service);
+            var file = Path.Combine(
+            reportsFolder,
+            $"SupportReport_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.txt"
+            );
+            File.WriteAllLines(file, lines);
+            Console.WriteLine("Отчёт создан: " + file);
+            logger.Info($"SUPPORT_REPORT created file=\"{file}\"");
+        });
+        continue;
+    }
 }
 internal class task
 {

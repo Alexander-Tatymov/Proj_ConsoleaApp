@@ -94,4 +94,5 @@ private static string CheckFolder(string name, string path)
         return $"{name}: ERROR ({path}) ->{ex.Message}";
     }
 }
+
 }
