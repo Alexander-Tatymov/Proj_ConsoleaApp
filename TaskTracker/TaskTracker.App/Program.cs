@@ -13,6 +13,7 @@ using TaskTracker.App.UI;
 using TaskTracker.App.Config;
 using TaskTracker.App.Security;
 using TaskTracker.Core.Migration;
+using TaskTracker.App.Help;
 
 var baseDir = AppContext.BaseDirectory;
 var configPath = Path.Combine(baseDir, "config.json");
@@ -850,6 +851,17 @@ while (true)
 
     continue;
 }
+
+    if (input == "27")
+    {
+        SafeRunner.Run("HELP", logger, () =>
+        {
+            Console.WriteLine(HelpText.Get());
+            logger.Info("HELP opened");
+        });
+
+        continue;
+    }
 
 
 }
