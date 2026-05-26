@@ -233,6 +233,36 @@ status)
         return _tasks.Where(t => !t.IsDeleted && !t.IsArchived).ToList();
     }
 
+    public void Archive(int id)
+    {
+        var task = GetExisting(id);
+
+        if (task.IsDeleted)
+            throw new ArgumentException("Нельзя архивировать задачу из корзины.");
+
+        if (task.IsArchived)
+            throw new ArgumentException("Задача уже в архиве.");
+
+        task.IsArchived = true;
+    }
+
+    public void Unarchive(int id)
+    {
+        var task = GetExisting(id);
+
+        if (task.IsDeleted)
+            throw new ArgumentException("Задача в корзине. Восстановите её.");
+
+        if (!task.IsArchived)
+            throw new ArgumentException("Задача не в архиве.");
+
+        task.IsArchived = false;
+    }
+
+    public List<TaskItem> GetArchive()
+    {
+        return _tasks.Where(t => !t.IsDeleted && t.IsArchived).ToList();
+    }
 
 
 }
