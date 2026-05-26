@@ -228,10 +228,11 @@ status)
         _nextId = _tasks.Count == 0 ? 1 : _tasks.Max(x => x.Id) + 1;
         return removed;
     }
-
     public List<TaskItem> GetAllActive()
     {
-        return _tasks.Where(t => !t.IsDeleted).ToList();
+        return _tasks.Where(t => !t.IsDeleted && !t.IsArchived).ToList();
     }
+
+
 
 }

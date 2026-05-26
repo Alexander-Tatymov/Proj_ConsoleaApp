@@ -11,9 +11,10 @@ namespace TaskTracker.Core.Models;
     public string Title { get; set; } = "";
     public string Description { get; set; } = ""; // ← добавили
     public TaskStatus Status { get; set; } = TaskStatus.New;
-
     public bool IsCompleted { get; internal set; }
     public bool IsDeleted { get; set; } = false;
+    public bool IsArchived { get; set; } = false;
+
 
     public void Add(TaskItem task)
     {
