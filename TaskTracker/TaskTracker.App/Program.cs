@@ -421,7 +421,10 @@ while (true)
 
     if (input == "11")
     {
-            AccessControl.RequireAdmin(cfg.Role);
+        Console.WriteLine("Введите полный путь к JSON-файлу.");
+        Console.WriteLine(@"Пример: C:\\Users\\Student\\Downloads\\tasks.json");
+
+        AccessControl.RequireAdmin(cfg.Role);
 
             Console.WriteLine("Импорт заменит текущий список задач!");
             Console.Write("Введите путь к JSON-файлу для импорта: ");
@@ -643,6 +646,9 @@ while (true)
 
     if (input == "18")
     {
+        Console.WriteLine("CSV должен содержать колонки: Id,Title,Description,Status");
+        Console.WriteLine("Status может быть New/InProgress/Done или 0/1/2");
+
         SafeRunner.Run("IMPORT_CSV", logger, () =>
         {
             AccessControl.RequireAdmin(cfg.Role);
@@ -778,8 +784,10 @@ while (true)
                 Console.WriteLine("Корзина пустая.");
                 return;
             }
+
         Console.Write("Удалить навсегда все задачи из корзины ? (y / n) : ");
-        var ans = (Console.ReadLine() ?? "").Trim().ToLower();
+            Console.WriteLine("ВНИМАНИЕ: очистка корзины удаляет задачи НАВСЕГДА.");
+            var ans = (Console.ReadLine() ?? "").Trim().ToLower();
             if (ans != "y")
             {
                 Console.WriteLine("Очистка отменена.");
