@@ -41,6 +41,10 @@ public static class ConsoleUi
         Console.WriteLine("21) Показать корзину");
         Console.WriteLine("22) Восстановить из корзины");
         Console.WriteLine("23) Очистить корзину (удалить навсегда)");
+        Console.WriteLine("24) Архивировать задачу");
+        Console.WriteLine("25) Показать архив");
+        Console.WriteLine("26) Вернуть из архива");
+
         Console.WriteLine("0) Выход");
 
         var version = typeof(Program).Assembly.GetName().Version?.ToString() ?? "unknown";

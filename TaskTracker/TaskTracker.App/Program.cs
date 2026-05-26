@@ -792,6 +792,66 @@ while (true)
         continue;
     }
 
+    if (input == "24")
+    {
+        SafeRunner.Run("ARCHIVE", logger, () =>
+        {
+        var active = service.GetAllActive();
+        ConsoleUi.PrintTasks(active);
+
+        Console.Write("Введите Id для архивации: ");
+        var text = (Console.ReadLine() ?? "").Trim();
+
+        if (!int.TryParse(text, out var id))
+            throw new ArgumentException("Id должно быть числом.");
+
+        service.Archive(id);
+        storage.Save(service.GetAll());
+
+        Console.WriteLine($"Задача Id={id} отправлена в архив.");
+        logger.Info($"ARCHIVE id={id}");
+    });
+
+    continue;
+}
+
+    if (input == "25")
+    {
+        SafeRunner.Run("ARCHIVE_LIST", logger, () =>
+        {
+            var archive = service.GetArchive();
+            Console.WriteLine("Архив:");
+            ConsoleUi.PrintTasks(archive);
+            logger.Info($"ARCHIVE_LIST count={archive.Count}");
+        });
+
+        continue;
+    }
+
+    if (input == "26")
+    {
+        SafeRunner.Run("UNARCHIVE", logger, () =>
+        {
+        var archive = service.GetArchive();
+        ConsoleUi.PrintTasks(archive);
+
+        Console.Write("Введите Id для возврата: ");
+        var text = (Console.ReadLine() ?? "").Trim();
+
+        if (!int.TryParse(text, out var id))
+            throw new ArgumentException("Id должно быть числом.");
+
+        service.Unarchive(id);
+        storage.Save(service.GetAll());
+
+        Console.WriteLine($"Задача Id={id} возвращена из архива.");
+        logger.Info($"UNARCHIVE id={id}");
+    });
+
+    continue;
+}
+
+
 }
 internal class task
 {
